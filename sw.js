@@ -1,6 +1,6 @@
 /* Farsi in 5 Minuten - Service Worker
    Macht die App offline nutzbar. Bei Aenderungen die Version hochzaehlen. */
-const CACHE = "farsi5-v1";
+const CACHE = "farsi5-v2";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest",
   "./icon-192.png", "./icon-512.png",
