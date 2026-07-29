@@ -1692,6 +1692,10 @@ function vSet(){
   } else {
     h += '<div class="warn" style="margin:0">Dieser Browser hat gar keine Sprachausgabe. Probier es mit Chrome.</div>';
   }
+  h += '<div class="set"><div><div class="lbl">Stimmen neu suchen</div><div class="d">'
+     + 'Antippen, nachdem du im System eine neue Stimme geladen hast. '
+     + (VOICES.length ? VOICES.length+' Stimme(n) erkannt' : 'noch keine Stimme erkannt')
+     + '</div></div><button class="btn sm" id="rescan">Suchen</button></div>';
   h += '</div>';
 
   if(!hasFaVoice()){
@@ -1745,6 +1749,13 @@ function vSet(){
   if(r) r.onchange = function(){ S.cfg.rate = parseFloat(r.value); save(); speak(TESTPHRASE); };
   var t = document.getElementById("test");
   if(t) t.onclick = function(){ speak(TESTPHRASE); };
+  var rs = document.getElementById("rescan");
+  if(rs) rs.onclick = function(){
+    try{ var q = new SpeechSynthesisUtterance(" "); q.volume = 0; speechSynthesis.speak(q); }catch(e){}
+    loadVoices();
+    setTimeout(function(){ loadVoices(); if(VIEW === "set") vSet(); }, 700);
+    vSet();
+  };
 
   document.getElementById("mic").onclick = function(){ if(!SR) return; S.cfg.mic = !S.cfg.mic; save(); vSet(); };
   document.getElementById("scr").onclick = function(){ S.cfg.script = !S.cfg.script; save(); vSet(); };
