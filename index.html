@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#12131a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Farsi 5">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Taeglich 5 Minuten Farsi lernen - 84 Lektionen mit Aussprache, Sprechuebungen und Fortschritt. Laeuft offline auf dem Handy.">
+<title>Farsi in 5 Minuten</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./favicon.png" sizes="32x32">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<style>
+:root{
+  --bg:#12131a; --bg2:#1a1c26; --card:#212431; --card2:#282c3b;
+  --line:#333849; --txt:#eef0f6; --dim:#9aa1b5; --dim2:#6f7689;
+  --acc:#3ddbc4; --acc-d:#0f3f3a; --gold:#f6b93b; --gold-d:#3d2f10;
+  --red:#ff6b7a; --red-d:#3d1a20; --grn:#5ddc7f;
+  --r:16px; --r2:22px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--bg); color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  font-size:16px; line-height:1.45;
+  overscroll-behavior-y:none; -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;font-size:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input{font-family:inherit;font-size:16px}
+
+/* ---------- Layout ---------- */
+#app{
+  max-width:520px;margin:0 auto;min-height:100%;
+  padding:calc(env(safe-area-inset-top) + 10px) 16px calc(env(safe-area-inset-bottom) + 92px);
+}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 18px}
+.hd h1{font-size:19px;margin:0;font-weight:700;letter-spacing:-.2px}
+.hd .sub{font-size:12.5px;color:var(--dim2);margin-top:1px}
+.pill{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--line);
+  border-radius:999px;padding:6px 11px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill.fire{color:var(--gold)} .pill.xp{color:var(--acc)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r2);padding:18px;margin-bottom:14px}
+.card.flat{background:var(--bg2)}
+h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:1.4px;color:var(--dim2);margin:26px 0 10px;font-weight:700}
+
+/* ---------- Buttons ---------- */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:16px;border-radius:var(--r);font-weight:700;font-size:16.5px;
+  background:var(--card2);border:1px solid var(--line);transition:transform .08s,filter .15s}
+.btn:active{transform:scale(.975)}
+.btn.pri{background:var(--acc);color:#06231f;border-color:transparent}
+.btn.gold{background:var(--gold);color:#33240a;border-color:transparent}
+.btn.ghost{background:transparent}
+.btn.sm{padding:11px 14px;font-size:14.5px;width:auto}
+.btn[disabled]{opacity:.4}
+.row{display:flex;gap:10px}
+
+/* ---------- Tabbar ---------- */
+#tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:rgba(18,19,26,.93);backdrop-filter:blur(14px);border-top:1px solid var(--line);
+  padding:8px 0 calc(env(safe-area-inset-bottom) + 8px)}
+#tabs .inner{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+#tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 0;color:var(--dim2);font-size:10.5px;font-weight:600}
+#tabs button.on{color:var(--acc)}
+#tabs .ic{font-size:20px;line-height:1}
+
+/* ---------- Home ---------- */
+.today{background:linear-gradient(160deg,#20323a,#1d2130);border:1px solid #2f4a4a}
+.today .wk{font-size:11.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--acc);font-weight:700}
+.today h3{margin:6px 0 6px;font-size:24px;letter-spacing:-.4px;line-height:1.2}
+.today p{margin:0 0 16px;color:var(--dim);font-size:14.5px}
+.bar{height:8px;background:var(--bg);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--gold));border-radius:99px;transition:width .4s}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 8px;text-align:center}
+.stat b{display:block;font-size:22px;font-weight:800;letter-spacing:-.5px}
+.stat span{font-size:11px;color:var(--dim2);font-weight:600}
+
+/* ---------- Lesson ---------- */
+#study{display:none;position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;
+  padding:calc(env(safe-area-inset-top) + 10px) 16px calc(env(safe-area-inset-bottom) + 20px)}
+#study .wrap{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.topbar .x{font-size:22px;color:var(--dim2);padding:2px 6px}
+.prog{flex:1;height:9px;background:var(--card);border-radius:99px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--acc);border-radius:99px;transition:width .3s}
+.qtype{font-size:11.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--dim2);font-weight:700;text-align:center;margin-bottom:14px}
+.stage{flex:1;display:flex;flex-direction:column;justify-content:center}
+.foot{padding-top:18px}
+
+.fa{font-size:34px;font-weight:800;letter-spacing:-.5px;text-align:center;line-height:1.25}
+.fa.sm{font-size:25px}
+.de{font-size:18px;color:var(--dim);text-align:center;margin-top:8px}
+.de.big{font-size:26px;font-weight:700;color:var(--txt)}
+.script{font-size:26px;text-align:center;margin-top:10px;direction:rtl;color:var(--dim);font-family:"Tahoma","Noto Naskh Arabic",serif}
+.note{background:var(--gold-d);border:1px solid #5a4415;color:#f8d488;border-radius:14px;
+  padding:11px 13px;font-size:13.5px;margin-top:16px;line-height:1.5}
+.spk{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px}
+.spk button{width:52px;height:52px;border-radius:50%;background:var(--acc-d);border:1px solid #1d6f65;
+  color:var(--acc);font-size:22px;display:flex;align-items:center;justify-content:center}
+.spk button.slow{width:44px;height:44px;font-size:16px;font-weight:700}
+.spk button:active{transform:scale(.92)}
+
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.opt{padding:15px 16px;border-radius:var(--r);background:var(--card);border:1.5px solid var(--line);
+  text-align:left;font-size:16.5px;font-weight:600;transition:.12s}
+.opt:active{transform:scale(.985)}
+.opt.ok{background:var(--acc-d);border-color:var(--acc);color:#8cf1e0}
+.opt.no{background:var(--red-d);border-color:var(--red);color:#ffb3bb}
+.opt .hint{display:block;font-size:12.5px;font-weight:500;color:var(--dim2);margin-top:2px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+.chip{padding:11px 15px;border-radius:12px;background:var(--card2);border:1px solid var(--line);font-weight:700;font-size:16px}
+.chip.used{opacity:.25;pointer-events:none}
+.slot{min-height:62px;border:1.5px dashed var(--line);border-radius:var(--r);padding:12px;
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-top:18px}
+.slot.ok{border-color:var(--acc);border-style:solid;background:var(--acc-d)}
+.slot.no{border-color:var(--red);border-style:solid;background:var(--red-d)}
+.slot .chip{background:var(--bg2)}
+
+.mic{width:96px;height:96px;border-radius:50%;margin:20px auto 0;display:flex;align-items:center;justify-content:center;
+  font-size:36px;background:var(--card2);border:2px solid var(--line);transition:.2s}
+.mic.rec{background:var(--red-d);border-color:var(--red);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,122,.5)}50%{box-shadow:0 0 0 16px rgba(255,107,122,0)}}
+.heard{text-align:center;color:var(--dim);font-size:14px;margin-top:14px;min-height:22px}
+
+.fb{border-radius:var(--r);padding:13px 15px;font-size:15px;font-weight:600;margin-top:16px}
+.fb.ok{background:var(--acc-d);color:#8cf1e0}
+.fb.no{background:var(--red-d);color:#ffb3bb}
+
+/* ---------- Progress ---------- */
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:4px}
+.heat i{aspect-ratio:1;border-radius:5px;background:var(--bg2);border:1px solid #262a38}
+.heat i.done{background:var(--acc);border-color:var(--acc)}
+.heat i.today{border:2px solid var(--gold)}
+.heat i.rev{background:var(--gold);border-color:var(--gold)}
+.heat i.rev.done{background:var(--acc)}
+.wkrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.wkrow:last-child{border:0}
+.wkrow .n{width:30px;height:30px;border-radius:9px;background:var(--bg2);display:flex;align-items:center;
+  justify-content:center;font-size:12.5px;font-weight:800;color:var(--dim2);flex:0 0 auto}
+.wkrow.done .n{background:var(--acc);color:#06231f}
+.wkrow.cur .n{background:var(--gold);color:#33240a}
+.wkrow .t{flex:1;font-size:14.5px;font-weight:600}
+.wkrow .c{font-size:12px;color:var(--dim2)}
+
+/* ---------- Vocab ---------- */
+.search{width:100%;padding:13px 15px;border-radius:var(--r);background:var(--card);
+  border:1px solid var(--line);color:var(--txt);outline:none;margin-bottom:12px}
+.search:focus{border-color:var(--acc)}
+.vrow{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.vrow:last-child{border:0}
+.vrow .txt{flex:1;min-width:0}
+.vrow .t1{font-weight:700;font-size:15.5px}
+.vrow .t2{font-size:13px;color:var(--dim);margin-top:1px}
+.vrow .t3{font-size:15px;color:var(--dim2);direction:rtl;margin-top:2px;font-family:"Tahoma","Noto Naskh Arabic",serif}
+.vrow .sp{width:36px;height:36px;border-radius:50%;background:var(--card2);display:flex;align-items:center;
+  justify-content:center;font-size:15px;flex:0 0 auto}
+.dots{display:flex;gap:3px;flex:0 0 auto}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--acc)}
+
+/* ---------- Settings ---------- */
+.set{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.set:last-child{border:0}
+.set .lbl{font-size:15px;font-weight:600}
+.set .d{font-size:12.5px;color:var(--dim2);margin-top:2px;line-height:1.4}
+.sw{width:50px;height:29px;border-radius:99px;background:var(--line);position:relative;flex:0 0 auto;transition:.2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on{background:var(--acc)} .sw.on::after{left:24px}
+select{background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:11px;padding:9px 11px;font-size:14px;max-width:180px}
+
+.warn{background:var(--gold-d);border:1px solid #5a4415;color:#f8d488;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.5;margin-bottom:14px}
+.muted{color:var(--dim2);font-size:13px;line-height:1.55}
+.center{text-align:center}
+.hide{display:none!important}
+.big-emoji{font-size:56px;text-align:center;line-height:1}
+.inst{background:linear-gradient(150deg,#1f2c3a,#1c1f2b);border:1px solid #2f4257}
+.inst h4{margin:0 0 6px;font-size:16px}
+.inst p{margin:0 0 14px;font-size:13.5px;color:var(--dim);line-height:1.55}
+.inst .no{width:100%;padding:10px;font-size:13px;color:var(--dim2);font-weight:600;margin-top:8px}
+.step{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--dim);margin-bottom:7px}
+.step b{color:var(--acc);flex:0 0 auto}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<nav id="tabs"><div class="inner">
+  <button data-v="home" class="on"><span class="ic">&#9733;</span>Heute</button>
+  <button data-v="prog"><span class="ic">&#9650;</span>Fortschritt</button>
+  <button data-v="vocab"><span class="ic">&#9776;</span>Wortschatz</button>
+  <button data-v="set"><span class="ic">&#9881;</span>Mehr</button>
+</div></nav>
+
+<div id="study"><div class="wrap">
+  <div class="topbar">
+    <button class="x" id="quit">&#10005;</button>
+    <div class="prog"><i id="pbar" style="width:0%"></i></div>
+    <div id="pcount" style="font-size:13px;color:var(--dim2);font-weight:700;min-width:38px;text-align:right"></div>
+  </div>
+  <div class="qtype" id="qtype"></div>
+  <div class="stage" id="stage"></div>
+  <div class="foot" id="foot"></div>
+</div></div>
+
+<script>
+"use strict";
+
+/* =========================================================================
+   1. LEHRPLAN  ·  12 Wochen · 84 Tage · Umgangssprache (Teheran), Du-Form
+   Format je Vokabel: [persische Schrift (für Audio), Lautschrift, Deutsch, Hinweis?]
+   ========================================================================= */
+const WEEKS = [
+
+/* ======================= WOCHE 1 ======================= */
+{t:"Hallo & Herzlichkeit", d:[
+ {t:"Die ersten Worte",
+  tip:"Farsi hat keine Geschlechter und kein der/die/das. Ein Wort ist einfach ein Wort – das macht den Anfang sehr leicht.",
+  w:[["سلام","salām","Hallo"],
+     ["چطوری؟","chetori?","Wie geht's dir?","Locker, unter Freunden und Familie."],
+     ["خوبم","khubam","Mir geht's gut"],
+     ["مرسی","merci","Danke","Kommt aus dem Französischen und ist im Alltag überall zu hören."],
+     ["تو چطوری؟","to chetori?","Und dir?"]],
+  p:["سلام، چطوری؟","salām, chetori?","Hallo, wie geht's dir?"]},
+ {t:"Guten Morgen, gute Nacht",
+  tip:"Das ā klingt dunkel, fast wie das o in „Wort“. Und kh ist das raue ch wie in „Bach“.",
+  w:[["صبح بخیر","sobh bekheyr","Guten Morgen"],
+     ["شب بخیر","shab bekheyr","Gute Nacht"],
+     ["خداحافظ","khodāhāfez","Tschüss"],
+     ["فعلاً","fe'lan","Bis dann","Das lockere „ciao“ unter Freunden."],
+     ["به سلامت","be salāmat","Mach's gut"]],
+  p:["شب بخیر، فعلاً","shab bekheyr, fe'lan","Gute Nacht, bis dann"]},
+ {t:"Ja, nein, vielleicht",
+  tip:"Unter Freunden und in der Familie sagt man آره (āre). بله (bale) klingt förmlich – am Telefon oder bei Fremden.",
+  w:[["بله","bale","ja (höflich)"],
+     ["آره","āre","ja (locker)"],
+     ["نه","na","nein"],
+     ["نمی‌دونم","nemidunam","ich weiß nicht"],
+     ["شاید","shāyad","vielleicht"]],
+  p:["نه، نمی‌دونم","na, nemidunam","Nein, ich weiß nicht"]},
+ {t:"Bitte und Danke",
+  tip:"خیلی (kheyli) heißt „sehr“ und passt vor fast alles: kheyli khub = sehr gut, kheyli mamnun = vielen Dank.",
+  w:[["لطفاً","lotfan","bitte"],
+     ["ببخشید","bebakhshid","Entschuldigung"],
+     ["خواهش می‌کنم","khāhesh mikonam","Gern geschehen"],
+     ["ممنون","mamnun","danke"],
+     ["خیلی ممنون","kheyli mamnun","vielen Dank"]],
+  p:["خیلی ممنون، خداحافظ","kheyli mamnun, khodāhāfez","Vielen Dank, tschüss"]},
+ {t:"Small Talk",
+  tip:"خسته نباشی heißt wörtlich „sei nicht müde“. Man sagt es zu jedem, der gerade arbeitet – vom Taxifahrer bis zur Mutter in der Küche.",
+  w:[["خوشبختم","khoshbakhtam","Freut mich"],
+     ["چه خبر؟","che khabar?","Was gibt's Neues?"],
+     ["سلامتی","salāmati","Nichts Besonderes","Die Standardantwort auf che khabar?"],
+     ["خسته نباشی","khaste nabāshi","Gute Arbeit!"],
+     ["حالت چطوره؟","hālet chetore?","Wie geht es dir?"]],
+  p:["سلام، چه خبر؟","salām, che khabar?","Hallo, was gibt's Neues?"]},
+ {t:"Nähe zeigen",
+  tip:"جان hängt man an Namen an: „Ali jān“, „Māmān jān“. Es ist die häufigste Form von Zuneigung im Iran.",
+  w:[["جان","jān","Liebe(r)","Anhängsel an Namen: Maryam jān."],
+     ["عزیزم","azizam","mein Schatz"],
+     ["دوستت دارم","dustet dāram","Ich hab dich lieb"],
+     ["دلم برات تنگ شده","delam barāt tang shode","Ich vermisse dich"],
+     ["قربونت برم","ghorbunet beram","Du bist ein Schatz","Wörtlich etwas ganz anderes – gemeint ist reine Zuneigung."]],
+  p:["عزیزم، دوستت دارم","azizam, dustet dāram","Mein Schatz, ich hab dich lieb"]},
+ {t:"Woche 1 festigen", r:true}
+]},
+
+/* ======================= WOCHE 2 ======================= */
+{t:"Ich und du", d:[
+ {t:"Wer ist wer",
+  tip:"Farsi unterscheidet nicht zwischen er und sie – اون (un) heißt beides. Und „und“ spricht man einfach als kurzes o: man o to.",
+  w:[["من","man","ich"],
+     ["تو","to","du"],
+     ["اون","un","er, sie"],
+     ["ما","mā","wir"],
+     ["اونا","unā","sie (Mehrzahl)"]],
+  p:["من و تو","man o to","ich und du"]},
+ {t:"Wie heißt du?",
+  tip:"چیه؟ (chie?) ist die Kurzform von „was ist?“. Genauso کیه؟ (kiye?) = „wer ist?“.",
+  w:[["اسمت چیه؟","esmet chie?","Wie heißt du?"],
+     ["اسم من مریمه","esm-e man Maryame","Ich heiße Maryam"],
+     ["هستم","hastam","ich bin"],
+     ["هستی","hasti","du bist"],
+     ["اون کیه؟","un kiye?","Wer ist das?"]],
+  p:["سلام، اسم من مریمه","salām, esm-e man Maryame","Hallo, ich heiße Maryam"]},
+ {t:"Woher kommst du?",
+  tip:"Die Endung -i macht aus dem Land die Herkunft: irān → irāni, ālmān → ālmāni.",
+  w:[["اهل کجایی؟","ahl-e kojāyi?","Woher kommst du?"],
+     ["من اهل آلمانم","man ahl-e ālmānam","Ich komme aus Deutschland"],
+     ["ایران","irān","Iran"],
+     ["آلمان","ālmān","Deutschland"],
+     ["ایرانی","irāni","iranisch, Iraner(in)"]],
+  p:["اهل کجایی؟","ahl-e kojāyi? man ahl-e irānam","Woher kommst du? Ich komme aus dem Iran"]},
+ {t:"Ich lerne noch",
+  tip:"Diese fünf Sätze retten jedes Gespräch. Wer sie sagt, bekommt fast immer ein Lächeln und langsameres Farsi zurück.",
+  w:[["فارسی","fārsi","Persisch, Farsi"],
+     ["فارسی بلد نیستم","fārsi balad nistam","Ich kann kein Farsi"],
+     ["کم کم یاد می‌گیرم","kam kam yād migiram","Ich lerne nach und nach"],
+     ["متوجه نمی‌شم","motevajjeh nemisham","Ich verstehe nicht"],
+     ["آروم‌تر لطفاً","ārumtar lotfan","Langsamer bitte"]],
+  p:["ببخشید، آروم‌تر لطفاً","bebakhshid, ārumtar lotfan","Entschuldigung, langsamer bitte"]},
+ {t:"Nachfragen",
+  tip:"بلد بودن (balad budan) heißt „können“ im Sinne von Wissen: fārsi baladam = ich kann Farsi.",
+  w:[["این چیه؟","in chie?","Was ist das?"],
+     ["به فارسی چی می‌شه؟","be fārsi chi mishe?","Wie sagt man das auf Farsi?"],
+     ["دوباره بگو","dobāre begu","Sag es nochmal"],
+     ["فهمیدم","fahmidam","Ich hab's verstanden"],
+     ["بلدم","baladam","Ich kann es"]],
+  p:["این به فارسی چی می‌شه؟","in be fārsi chi mishe?","Wie heißt das auf Farsi?"]},
+ {t:"Ein paar Fakten",
+  tip:"تو (tu) heißt hier „in“. Es ist die Alltagsform von توی (tuye).",
+  w:[["چند سالته؟","chand sālete?","Wie alt bist du?"],
+     ["کجا زندگی می‌کنی؟","kojā zendegi mikoni?","Wo wohnst du?"],
+     ["من تو برلین زندگی می‌کنم","man tu Berlin zendegi mikonam","Ich wohne in Berlin"],
+     ["شغلت چیه؟","shoghlet chie?","Was machst du beruflich?"],
+     ["دانشجوام","dāneshjuam","Ich bin Student(in)"]],
+  p:["اسمت چیه؟ چند سالته؟","esmet chie? chand sālete?","Wie heißt du? Wie alt bist du?"]},
+ {t:"Woche 2 festigen", r:true}
+]},
+
+/* ======================= WOCHE 3 ======================= */
+{t:"Zahlen und Zeit", d:[
+ {t:"Eins bis fünf",
+  tip:"چهار spricht man im Alltag oft kurz als „chār“. Beides ist richtig.",
+  w:[["یک","yek","eins"],
+     ["دو","do","zwei"],
+     ["سه","se","drei"],
+     ["چهار","chāhār","vier"],
+     ["پنج","panj","fünf"]],
+  p:["یک، دو، سه","yek, do, se","eins, zwei, drei"]},
+ {t:"Sechs bis zehn",
+  tip:"Achtung: نه heißt „nein“ (na) und „neun“ (noh). Nur der Vokal unterscheidet die beiden.",
+  w:[["شش","shesh","sechs"],
+     ["هفت","haft","sieben"],
+     ["هشت","hasht","acht"],
+     ["نه","noh","neun"],
+     ["ده","dah","zehn"]],
+  p:["هشت، نه، ده","hasht, noh, dah","acht, neun, zehn"]},
+ {t:"Elf bis zwanzig",
+  tip:"Ab elf hörst du immer das dah (zehn) mit: yāz-dah, davāz-dah, siz-dah.",
+  w:[["یازده","yāzdah","elf"],
+     ["دوازده","davāzdah","zwölf"],
+     ["سیزده","sizdah","dreizehn"],
+     ["پونزده","punzdah","fünfzehn"],
+     ["بیست","bist","zwanzig"]],
+  p:["من بیست سالمه","man bist sālame","Ich bin zwanzig Jahre alt"]},
+ {t:"Größere Zahlen",
+  tip:"Zusammensetzen mit o (und): bist o panj = 25, si o do = 32, sad o dah = 110.",
+  w:[["سی","si","dreißig"],
+     ["چهل","chehel","vierzig"],
+     ["پنجاه","panjāh","fünfzig"],
+     ["صد","sad","hundert"],
+     ["هزار","hezār","tausend"]],
+  p:["بیست و پنج","bist o panj","fünfundzwanzig"]},
+ {t:"Wie spät ist es?",
+  tip:"„Halb sechs“ heißt panj o nim – also „fünf und halb“. Man zählt von der vollen Stunde nach oben, nicht zur nächsten hin.",
+  w:[["ساعت چنده؟","sā'at chande?","Wie spät ist es?"],
+     ["ساعت پنجه","sā'at panje","Es ist fünf Uhr"],
+     ["نیم","nim","halb"],
+     ["یه ربع","ye rob","Viertel"],
+     ["الان","alān","jetzt"]],
+  p:["الان ساعت چنده؟","alān sā'at chande?","Wie spät ist es jetzt?"]},
+ {t:"Heute, morgen, gestern",
+  tip:"Diese drei Wörter brauchst du in fast jedem Gespräch über Pläne. Lerne sie richtig fest.",
+  w:[["امروز","emruz","heute"],
+     ["فردا","fardā","morgen"],
+     ["دیروز","diruz","gestern"],
+     ["صبح","sobh","Morgen, morgens"],
+     ["شب","shab","Abend, Nacht"]],
+  p:["فردا صبح","fardā sobh","morgen früh"]},
+ {t:"Woche 3 festigen", r:true}
+]},
+
+/* ======================= WOCHE 4 ======================= */
+{t:"Familie", d:[
+ {t:"Die Nächsten",
+  tip:"مادر (mādar) und پدر (pedar) sind die formellen Wörter. Zu Hause sagt fast jeder māmān und bābā.",
+  w:[["مامان","māmān","Mama"],
+     ["بابا","bābā","Papa"],
+     ["خواهر","khāhar","Schwester"],
+     ["برادر","barādar","Bruder"],
+     ["بچه","bachche","Kind"]],
+  p:["مامان و بابا","māmān o bābā","Mama und Papa"]},
+ {t:"Mein …",
+  tip:"„Mein“ hängt man als -am an: māmān → māmānam. Endet das Wort auf einen Vokal, wird daraus nur -m: bābā → bābām.",
+  w:[["مامانم","māmānam","meine Mama"],
+     ["بابام","bābām","mein Papa"],
+     ["خواهرم","khāharam","meine Schwester"],
+     ["برادرم","barādaram","mein Bruder"],
+     ["خانواده‌م","khunevādam","meine Familie"]],
+  p:["خانواده‌م تو ایرانه","khunevādam tu irāne","Meine Familie ist im Iran"]},
+ {t:"Dein …",
+  tip:"-am = mein, -et = dein, -esh = sein/ihr. Mit diesen drei Endungen kannst du ab jetzt jedes Wort besitzen.",
+  w:[["اسمت","esmet","dein Name"],
+     ["مامانت","māmānet","deine Mama"],
+     ["خونه‌ت","khunat","dein Zuhause"],
+     ["دلم","delam","mein Herz"],
+     ["دوستم","dustam","mein(e) Freund(in)"]],
+  p:["مامانت چطوره؟","māmānet chetore?","Wie geht es deiner Mama?"]},
+ {t:"Partnerschaft",
+  tip:"دوست‌پسر und دوست‌دختر sind wörtlich „Freund-Junge“ und „Freund-Mädchen“ – der ganz normale Alltagsausdruck.",
+  w:[["شوهر","shohar","Ehemann"],
+     ["زن","zan","Frau, Ehefrau"],
+     ["دوست‌پسر","dust-pesar","fester Freund"],
+     ["دوست‌دختر","dust-dokhtar","feste Freundin"],
+     ["نامزد","nāmzad","Verlobte(r)"]],
+  p:["نامزدم اهل ایرانه","nāmzadam ahl-e irāne","Mein Verlobter kommt aus dem Iran"]},
+ {t:"Menschen",
+  tip:"خانم und آقا stehen beim Namen: „Khānum Ahmadi“, „Ali āghā“. Damit klingt jede Anrede höflich.",
+  w:[["پسر","pesar","Junge, Sohn"],
+     ["دختر","dokhtar","Mädchen, Tochter"],
+     ["مرد","mard","Mann"],
+     ["خانم","khānum","Frau, Dame"],
+     ["آقا","āghā","Herr"]],
+  p:["اون دختر کیه؟","un dokhtar kiye?","Wer ist das Mädchen?"]},
+ {t:"Onkel, Tanten, Großeltern",
+  tip:"Farsi unterscheidet genau, ob die Verwandtschaft über Mutter oder Vater läuft. Wer das richtig trifft, sammelt sofort Sympathiepunkte.",
+  w:[["دایی","dāyi","Onkel (Bruder der Mutter)"],
+     ["عمو","amu","Onkel (Bruder des Vaters)"],
+     ["خاله","khāle","Tante (Schwester der Mutter)"],
+     ["عمه","amme","Tante (Schwester des Vaters)"],
+     ["مادربزرگ","mādarbozorg","Oma"]],
+  p:["مادربزرگم تو ایرانه","mādarbozorgam tu irāne","Meine Oma ist im Iran"]},
+ {t:"Woche 4 festigen", r:true}
+]}
+
+,
+
+/* ======================= WOCHE 5 ======================= */
+{t:"Zuhause und Dinge", d:[
+ {t:"Wohnen",
+  tip:"خونه ist die gesprochene Form von خانه. Im Alltag wird aus einem langen ā oft ein u: khāne → khune, nān → nun.",
+  w:[["خونه","khune","Haus, Zuhause"],
+     ["اتاق","otāgh","Zimmer"],
+     ["آشپزخونه","āshpazkhune","Küche"],
+     ["حموم","hammum","Bad"],
+     ["تختخواب","takhtekhāb","Bett"]],
+  p:["من تو خونه‌ام","man tu khunam","Ich bin zu Hause"]},
+ {t:"Hier und dort",
+  tip:"اون (un) heißt nicht nur „er/sie“, sondern auch „das da“ – je nachdem, worauf du zeigst.",
+  w:[["این","in","das, dies"],
+     ["اینجا","injā","hier"],
+     ["اونجا","unjā","dort"],
+     ["کجا","kojā","wo"],
+     ["اینا","inā","diese (Mehrzahl)"]],
+  p:["بیا اینجا","biyā injā","Komm her"]},
+ {t:"Dinge im Raum",
+  tip:"رو (ro) markiert das Objekt im Satz: „dar ro beband“ = mach die Tür zu. Im Deutschen gibt es dafür nichts – einfach mitsprechen.",
+  w:[["میز","miz","Tisch"],
+     ["صندلی","sandali","Stuhl"],
+     ["در","dar","Tür"],
+     ["پنجره","panjere","Fenster"],
+     ["چراغ","cherāgh","Lampe"]],
+  p:["در رو ببند لطفاً","dar ro beband lotfan","Mach bitte die Tür zu"]},
+ {t:"Es gibt, es gibt nicht",
+  tip:"Zwischen zwei Wörtern klebt oft ein kurzes -e (Ezāfe): ru-ye miz = auf dem Tisch, khune-ye mā = unser Haus.",
+  w:[["هست","hast","es ist da, es gibt"],
+     ["نیست","nist","ist nicht da"],
+     ["روی","ru-ye","auf"],
+     ["توی","tuye","in"],
+     ["کنار","kenār-e","neben"]],
+  p:["مامانم خونه نیست","māmānam khune nist","Meine Mama ist nicht zu Hause"]},
+ {t:"Meine Sachen",
+  tip:"Die Mehrzahl bildest du mit -hā: ketāb → ketābhā (Bücher), kelid → kelidhā (Schlüssel).",
+  w:[["گوشی","gushi","Handy"],
+     ["کتاب","ketāb","Buch"],
+     ["کلید","kelid","Schlüssel"],
+     ["پول","pul","Geld"],
+     ["کیف","kif","Tasche"]],
+  p:["گوشیم کجاست؟","gushim kojāst?","Wo ist mein Handy?"]},
+ {t:"Suchen und finden",
+  tip:"کجاست؟ ist die Kurzform von „kojā hast?“ – wo ist? Genauso injāst = injā hast.",
+  w:[["مال منه","māl-e mane","Das gehört mir"],
+     ["کجاست؟","kojāst?","Wo ist es?"],
+     ["اینجاست","injāst","Es ist hier"],
+     ["پیدا نمی‌کنم","peydā nemikonam","Ich finde es nicht"],
+     ["بده به من","bede be man","Gib es mir"]],
+  p:["کلیدم کجاست؟","kelidam kojāst?","Wo ist mein Schlüssel?"]},
+ {t:"Woche 5 festigen", r:true}
+]},
+
+/* ======================= WOCHE 6 ======================= */
+{t:"Essen und Trinken", d:[
+ {t:"Was auf den Tisch kommt",
+  tip:"Tee ist im Iran das Getränk schlechthin. „Ye chāy mikhori?“ ist die häufigste Einladung überhaupt.",
+  w:[["آب","āb","Wasser"],
+     ["چای","chāy","Tee"],
+     ["قهوه","ghahve","Kaffee"],
+     ["نون","nun","Brot"],
+     ["برنج","berenj","Reis"]],
+  p:["یه چای لطفاً","ye chāy lotfan","Einen Tee bitte"]},
+ {t:"Auf dem Teller",
+  tip:"سبزی meint die frischen Kräuter, die auf fast jedem iranischen Tisch stehen: Minze, Basilikum, Estragon.",
+  w:[["گوشت","gusht","Fleisch"],
+     ["مرغ","morgh","Hähnchen"],
+     ["ماهی","māhi","Fisch"],
+     ["سبزی","sabzi","Kräuter, Gemüse"],
+     ["سالاد","sālād","Salat"]],
+  p:["مرغ یا ماهی؟","morgh yā māhi?","Hähnchen oder Fisch?"]},
+ {t:"Mahlzeiten",
+  tip:"Wer im Iran zu Besuch ist, bekommt immer etwas angeboten. Zweimal höflich ablehnen und beim dritten Mal annehmen gilt als guter Ton.",
+  w:[["غذا","ghazā","Essen"],
+     ["صبحونه","sobhune","Frühstück"],
+     ["ناهار","nāhār","Mittagessen"],
+     ["شام","shām","Abendessen"],
+     ["شیرینی","shirini","Süßigkeit, Gebäck"]],
+  p:["شام آماده‌ست","shām āmādast","Das Abendessen ist fertig"]},
+ {t:"Hunger und Genuss",
+  tip:"گشنمه ist die zusammengezogene Alltagsform. So spricht wirklich jeder – die Schulbuchform hört man kaum.",
+  w:[["گشنمه","goshname","Ich habe Hunger"],
+     ["تشنمه","teshname","Ich habe Durst"],
+     ["خوشمزه‌ست","khoshmazast","Es ist lecker"],
+     ["سیر شدم","sir shodam","Ich bin satt"],
+     ["نوش جان","nush-e jān","Guten Appetit"]],
+  p:["خیلی خوشمزه‌ست","kheyli khoshmazast","Das ist sehr lecker"]},
+ {t:"Wollen und Menge",
+  tip:"می‌خوام ist die gesprochene Form von می‌خواهم. Beim Sprechen fällt das h fast immer weg.",
+  w:[["می‌خوام","mikhām","ich will, ich möchte"],
+     ["نمی‌خوام","nemikhām","ich will nicht"],
+     ["می‌خوای؟","mikhāy?","willst du?"],
+     ["یه کم","ye kam","ein bisschen"],
+     ["بیشتر","bishtar","mehr"]],
+  p:["یه کم آب می‌خوام","ye kam āb mikhām","Ich möchte ein bisschen Wasser"]},
+ {t:"Mögen und nicht mögen",
+  tip:"قرمه سبزی ist der Klassiker der iranischen Küche: Kräutereintopf mit Bohnen und getrockneten Limetten.",
+  w:[["دوست دارم","dust dāram","ich mag"],
+     ["دوست ندارم","dust nadāram","ich mag nicht"],
+     ["غذای ایرانی","ghazā-ye irāni","iranisches Essen"],
+     ["کباب","kabāb","Kebab"],
+     ["قرمه سبزی","ghorme sabzi","Ghorme Sabzi"]],
+  p:["غذای ایرانی دوست دارم","ghazā-ye irāni dust dāram","Ich mag iranisches Essen"]},
+ {t:"Woche 6 festigen", r:true}
+]},
+
+/* ======================= WOCHE 7 ======================= */
+{t:"Was ich jeden Tag tue", d:[
+ {t:"Fünf Verben, die alles tragen",
+  tip:"می- am Anfang macht die Gegenwart, -am am Ende heißt „ich“. Dazwischen steckt der Verbstamm: mi-r-am = ich gehe.",
+  w:[["می‌کنم","mikonam","ich mache"],
+     ["می‌رم","miram","ich gehe"],
+     ["میام","miyām","ich komme"],
+     ["می‌خورم","mikhoram","ich esse"],
+     ["می‌خوابم","mikhābam","ich schlafe"]],
+  p:["الان میام","alān miyām","Ich komme sofort"]},
+ {t:"Fünf weitere Verben",
+  tip:"می‌دونم kennst du schon aus der ersten Woche – in der Verneinung: nemidunam, ich weiß nicht.",
+  w:[["می‌بینم","mibinam","ich sehe"],
+     ["می‌گم","migam","ich sage"],
+     ["می‌شنوم","mishnavam","ich höre"],
+     ["می‌دونم","midunam","ich weiß"],
+     ["می‌دم","midam","ich gebe"]],
+  p:["فردا می‌بینمت","fardā mibinamet","Ich sehe dich morgen"]},
+ {t:"Und du?",
+  tip:"Für „du“ tauschst du nur die Endung: -am wird zu -i. mikonam → mikoni, miram → miri.",
+  w:[["می‌کنی","mikoni","du machst"],
+     ["می‌ری","miri","du gehst"],
+     ["میای","miyāy","du kommst"],
+     ["می‌خوری","mikhori","du isst"],
+     ["می‌خوابی","mikhābi","du schläfst"]],
+  p:["کجا می‌ری؟","kojā miri?","Wo gehst du hin?"]},
+ {t:"Nein sagen",
+  tip:"Verneinen ist einfach: aus mi- wird nemi-. miram → nemiram, mikhoram → nemikhoram.",
+  w:[["نمی‌رم","nemiram","ich gehe nicht"],
+     ["نمی‌خورم","nemikhoram","ich esse nicht"],
+     ["نمی‌بینم","nemibinam","ich sehe nicht"],
+     ["نمی‌گم","nemigam","ich sage nichts"],
+     ["نمی‌خوابم","nemikhābam","ich schlafe nicht"]],
+  p:["امروز نمی‌رم","emruz nemiram","Heute gehe ich nicht"]},
+ {t:"Der Tagesablauf",
+  tip:"Sehr viele Verben bestehen aus Hauptwort + کردن (machen): kār kardan = arbeiten, varzesh kardan = Sport machen.",
+  w:[["کار می‌کنم","kār mikonam","ich arbeite"],
+     ["درس می‌خونم","dars mikhunam","ich lerne"],
+     ["ورزش می‌کنم","varzesh mikonam","ich mache Sport"],
+     ["استراحت می‌کنم","esterāhat mikonam","ich ruhe mich aus"],
+     ["تلفن می‌کنم","telefon mikonam","ich rufe an"]],
+  p:["صبح کار می‌کنم","sobh kār mikonam","Morgens arbeite ich"]},
+ {t:"Wir und sie",
+  tip:"-im heißt „wir“, -an heißt „sie“. Damit hast du alle Endungen der Gegenwart beisammen.",
+  w:[["می‌ریم","mirim","wir gehen"],
+     ["می‌خوریم","mikhorim","wir essen"],
+     ["می‌کنیم","mikonim","wir machen"],
+     ["می‌رن","miran","sie gehen"],
+     ["بیا بریم","biyā berim","Komm, lass uns gehen"]],
+  p:["بیا بریم بیرون","biyā berim birun","Komm, lass uns rausgehen"]},
+ {t:"Woche 7 festigen", r:true}
+]},
+
+/* ======================= WOCHE 8 ======================= */
+{t:"Fragen stellen", d:[
+ {t:"Die Fragewörter",
+  tip:"Anders als im Deutschen bleibt das Fragewort dort stehen, wo die Antwort hingehört: „kojā miri?“ heißt wörtlich „du gehst wohin?“.",
+  w:[["چی","chi","was"],
+     ["کی","ki","wer"],
+     ["چرا","cherā","warum"],
+     ["چطور","chetor","wie"],
+     ["چند","chand","wie viel"]],
+  p:["این چطوره؟","in chetore?","Wie ist das?"]},
+ {t:"Wie viele, welcher",
+  tip:"چندتا fragt nach der Stückzahl, چنده nach dem Preis. Ein Buchstabe Unterschied, zwei ganz verschiedene Fragen.",
+  w:[["چندتا؟","chandtā?","Wie viele?"],
+     ["چنده؟","chande?","Was kostet das?"],
+     ["کدوم؟","kodum?","Welcher?"],
+     ["مال کیه؟","māl-e kiye?","Wem gehört das?"],
+     ["با کی؟","bā ki?","Mit wem?"]],
+  p:["این چنده؟","in chande?","Was kostet das?"]},
+ {t:"Ganze Fragen",
+  tip:"چی شده؟ ist die Standardfrage, wenn jemand komisch aussieht: „Was ist passiert?“",
+  w:[["چی می‌خوای؟","chi mikhāy?","Was willst du?"],
+     ["کی میای؟","key miyāy?","Wann kommst du?"],
+     ["چیکار می‌کنی؟","chikār mikoni?","Was machst du gerade?"],
+     ["چی شده؟","chi shode?","Was ist los?"],
+     ["کجایی؟","kojāyi?","Wo bist du?"]],
+  p:["کجایی؟ کی میای؟","kojāyi? key miyāy?","Wo bist du? Wann kommst du?"]},
+ {t:"Um etwas bitten",
+  tip:"می‌شه؟ ist der höflichste Alltagsanfang für jede Bitte: „mishe komak koni?“ – „könntest du helfen?“",
+  w:[["می‌شه؟","mishe?","Geht das? Darf ich?"],
+     ["می‌تونم؟","mitunam?","Kann ich?"],
+     ["کمک می‌کنی؟","komak mikoni?","Hilfst du mir?"],
+     ["حتماً","hatman","Klar, auf jeden Fall"],
+     ["البته","albatte","Natürlich"]],
+  p:["می‌شه کمکم کنی؟","mishe komakam koni?","Kannst du mir helfen?"]},
+ {t:"Haben und zustimmen",
+  tip:"باشه ist das persische „okay“ und passt auf fast jede Zusage.",
+  w:[["دارم","dāram","ich habe"],
+     ["داری؟","dāri?","hast du?"],
+     ["ندارم","nadāram","ich habe nicht"],
+     ["باشه","bāshe","okay"],
+     ["درسته","doroste","Stimmt, richtig"]],
+  p:["وقت داری؟","vaght dāri?","Hast du Zeit?"]},
+ {t:"Müssen und können",
+  tip:"Nach باید und می‌خوام kommt eine besondere Verbform mit be-: beram (gehen), bokhoram (essen), bebinam (sehen).",
+  w:[["باید","bāyad","müssen, sollen"],
+     ["می‌تونم","mitunam","ich kann"],
+     ["نمی‌تونم","nemitunam","ich kann nicht"],
+     ["می‌خوام برم","mikhām beram","ich will gehen"],
+     ["باید برم","bāyad beram","ich muss gehen"]],
+  p:["ببخشید، باید برم","bebakhshid, bāyad beram","Entschuldigung, ich muss gehen"]},
+ {t:"Woche 8 festigen", r:true}
+]}
+
+,
+
+/* ======================= WOCHE 9 ======================= */
+{t:"Gefühle und Meinungen", d:[
+ {t:"Wie fühlst du dich?",
+  tip:"Mit -am wird aus dem Wort ein ganzer Satz: khoshhāl → khoshhālam (ich bin glücklich), khaste → khastam (ich bin müde).",
+  w:[["خوشحال","khoshhāl","glücklich, froh"],
+     ["ناراحت","nārāhat","traurig, verärgert"],
+     ["خسته","khaste","müde"],
+     ["عصبانی","asabāni","wütend"],
+     ["نگران","negarān","besorgt"]],
+  p:["خیلی خسته‌ام","kheyli khastam","Ich bin sehr müde"]},
+ {t:"Mir geht es …",
+  tip:"حال (hāl) ist der Zustand: hālam khube – „mein Zustand ist gut“. Daher auch hālet chetore?",
+  w:[["خوشحالم","khoshhālam","Ich bin glücklich"],
+     ["حالم خوبه","hālam khube","Mir geht es gut"],
+     ["حالم بده","hālam bade","Mir geht es schlecht"],
+     ["حوصله ندارم","hosele nadāram","Ich habe keine Lust"],
+     ["دلم گرفته","delam gerefte","Ich bin bedrückt"]],
+  p:["حالم خوبه، مرسی","hālam khube, merci","Mir geht es gut, danke"]},
+ {t:"Verstärken",
+  tip:"اصلاً verstärkt eine Verneinung: „aslan dust nadāram“ – ich mag es überhaupt nicht.",
+  w:[["خوب","khub","gut"],
+     ["بد","bad","schlecht"],
+     ["خیلی","kheyli","sehr"],
+     ["عالی","āli","super"],
+     ["اصلاً","aslan","überhaupt (nicht)"]],
+  p:["خیلی عالیه","kheyli āliye","Das ist super"]},
+ {t:"Menschen beschreiben",
+  tip:"مهربون ist das größte Kompliment für einen Menschen im Iran – wärmer als das deutsche „nett“.",
+  w:[["قشنگ","ghashang","schön"],
+     ["بامزه","bāmaze","süß, witzig"],
+     ["مهربون","mehrabun","lieb, herzlich"],
+     ["باهوش","bāhush","klug"],
+     ["خنده‌دار","khandedār","lustig"]],
+  p:["خیلی مهربونی","kheyli mehrabuni","Du bist sehr lieb"]},
+ {t:"Zuneigung",
+  tip:"دلم می‌خواد heißt wörtlich „mein Herz will“ – die persische Art, einen Wunsch auszudrücken.",
+  w:[["عاشقتم","āsheghetam","Ich bin verliebt in dich"],
+     ["برام مهمی","barām mohemmi","Du bist mir wichtig"],
+     ["دلم می‌خواد ببینمت","delam mikhād bebinamet","Ich möchte dich sehen"],
+     ["ممنونم ازت","mamnunam azat","Danke dir"],
+     ["بهت فکر می‌کنم","behet fekr mikonam","Ich denke an dich"]],
+  p:["دلم برات تنگ شده عزیزم","delam barāt tang shode azizam","Ich vermisse dich, mein Schatz"]},
+ {t:"Streit und Versöhnung",
+  tip:"قهر ist das persische Schweigen nach einem Streit – es hat ein eigenes Wort, weil es so oft vorkommt.",
+  w:[["متأسفم","mote'assefam","Es tut mir leid"],
+     ["اشتباه کردم","eshtebāh kardam","Ich habe einen Fehler gemacht"],
+     ["قهر نکن","ghahr nakon","Sei nicht beleidigt"],
+     ["آشتی","āshti","Versöhnung"],
+     ["عیبی نداره","eybi nadāre","Macht nichts"]],
+  p:["ببخشید، اشتباه کردم","bebakhshid, eshtebāh kardam","Entschuldige, ich habe einen Fehler gemacht"]},
+ {t:"Woche 9 festigen", r:true}
+]},
+
+/* ======================= WOCHE 10 ======================= */
+{t:"Was gestern war", d:[
+ {t:"Fünf Verben in der Vergangenheit",
+  tip:"Die Vergangenheit ist kürzer als die Gegenwart: Stamm plus Endung, ohne mi-. raft-am = ich ging.",
+  w:[["رفتم","raftam","ich ging"],
+     ["اومدم","umadam","ich kam"],
+     ["خوردم","khordam","ich aß"],
+     ["دیدم","didam","ich sah"],
+     ["کردم","kardam","ich machte"]],
+  p:["دیروز رفتم","diruz raftam","Gestern bin ich gegangen"]},
+ {t:"War und war nicht",
+  tip:"بود ist die Vergangenheit von „ist“. Anders als im Deutschen braucht es kein Hilfsverb wie „haben“ oder „sein“.",
+  w:[["بودم","budam","ich war"],
+     ["بودی","budi","du warst"],
+     ["بود","bud","er/sie/es war"],
+     ["بودیم","budim","wir waren"],
+     ["نبود","nabud","war nicht"]],
+  p:["دیروز خونه بودم","diruz khune budam","Gestern war ich zu Hause"]},
+ {t:"Und du gestern?",
+  tip:"Auch in der Vergangenheit endet „du“ auf -i: rafti, khordi, didi, kardi.",
+  w:[["رفتی","rafti","du gingst"],
+     ["خوردی","khordi","du aßt"],
+     ["دیدی","didi","du sahst"],
+     ["کردی","kardi","du machtest"],
+     ["چیکار کردی؟","chikār kardi?","Was hast du gemacht?"]],
+  p:["دیروز چیکار کردی؟","diruz chikār kardi?","Was hast du gestern gemacht?"]},
+ {t:"Zeitangaben",
+  tip:"پیش heißt „vorher“ und macht aus jeder Zeitangabe eine Vergangenheit: hafte-ye pish, māh-e pish, sāl-e pish.",
+  w:[["هفته‌ی پیش","hafte-ye pish","letzte Woche"],
+     ["ماه پیش","māh-e pish","letzten Monat"],
+     ["قبلاً","ghablan","früher"],
+     ["تازه","tāze","gerade eben"],
+     ["هنوز","hanuz","noch"]],
+  p:["هفته‌ی پیش اینجا بودم","hafte-ye pish injā budam","Letzte Woche war ich hier"]},
+ {t:"Erzählen",
+  tip:"خوش گذشت sagt man nach jedem schönen Abend. Die übliche Antwort: „be mā ham khosh gozasht“ – uns auch.",
+  w:[["خوب بود","khub bud","Es war gut"],
+     ["خوش گذشت","khosh gozasht","Es hat Spaß gemacht"],
+     ["کجا بودی؟","kojā budi?","Wo warst du?"],
+     ["چی شد؟","chi shod?","Was ist passiert?"],
+     ["هیچی","hichi","nichts"]],
+  p:["خیلی خوش گذشت","kheyli khosh gozasht","Es hat viel Spaß gemacht"]},
+ {t:"Noch mehr Vergangenheit",
+  tip:"Manche Stämme sehen ganz anders aus als in der Gegenwart: migam → goftam, mibinam → didam. Die lernst du am besten als Paar.",
+  w:[["گفتم","goftam","ich sagte"],
+     ["شنیدم","shenidam","ich hörte"],
+     ["دادم","dādam","ich gab"],
+     ["گرفتم","gereftam","ich nahm, ich bekam"],
+     ["نوشتم","neveshtam","ich schrieb"]],
+  p:["بهت گفتم","behet goftam","Ich habe es dir gesagt"]},
+ {t:"Woche 10 festigen", r:true}
+]},
+
+/* ======================= WOCHE 11 ======================= */
+{t:"Pläne machen", d:[
+ {t:"Wann?",
+  tip:"دیگه heißt „andere, nächste“ und ist eines der meistbenutzten Wörter überhaupt: hafte-ye dige, ye chize dige.",
+  w:[["امشب","emshab","heute Abend"],
+     ["آخر هفته","ākhar-e hafte","Wochenende"],
+     ["هفته‌ی دیگه","hafte-ye dige","nächste Woche"],
+     ["بعداً","ba'dan","später"],
+     ["زود","zud","bald, früh"]],
+  p:["امشب وقت داری؟","emshab vaght dāri?","Hast du heute Abend Zeit?"]},
+ {t:"Etwas vorschlagen",
+  tip:"Ein Vorschlag braucht kein „lass uns“ – die Wir-Form mit be- reicht: berim = lass uns gehen, bokhorim = lass uns essen.",
+  w:[["برنامه داری؟","barnāme dāri?","Hast du was vor?"],
+     ["بریم بیرون","berim birun","Lass uns rausgehen"],
+     ["بیا خونه‌ی ما","biyā khune-ye mā","Komm zu uns"],
+     ["می‌تونیم","mitunim","wir können"],
+     ["چیکار کنیم؟","chikār konim?","Was sollen wir machen?"]],
+  p:["آخر هفته برنامه داری؟","ākhar-e hafte barnāme dāri?","Hast du am Wochenende was vor?"]},
+ {t:"Wohin?",
+  tip:"مهمونی ist das Herz des iranischen Soziallebens – jede Einladung nach Hause, ob groß oder klein.",
+  w:[["سینما","sinemā","Kino"],
+     ["پارک","pārk","Park"],
+     ["رستوران","resturān","Restaurant"],
+     ["مهمونی","mehmuni","Feier, Einladung"],
+     ["سفر","safar","Reise"]],
+  p:["بریم سینما","berim sinemā","Lass uns ins Kino gehen"]},
+ {t:"Zu Gast",
+  tip:"بفرمایید ist das Universalwort für Höflichkeit: bitte nimm, bitte setz dich, bitte geh vor.",
+  w:[["مهمون","mehmun","Gast"],
+     ["دعوت","da'vat","Einladung"],
+     ["دعوتت می‌کنم","da'vatet mikonam","Ich lade dich ein"],
+     ["خوش اومدی","khosh umadi","Willkommen"],
+     ["بفرمایید","befarmāyid","Bitte sehr"]],
+  p:["خوش اومدی، بفرمایید","khosh umadi, befarmāyid","Willkommen, bitte sehr"]},
+ {t:"Sich verabreden",
+  tip:"منتظرم ist kurz und praktisch – vor der Tür, am Bahnhof, im Chat.",
+  w:[["ساعت چند؟","sā'at chand?","Um wie viel Uhr?"],
+     ["کجا همدیگه رو ببینیم؟","kojā hamdige ro bebinim?","Wo treffen wir uns?"],
+     ["میام دنبالت","miyām donbālet","Ich hole dich ab"],
+     ["منتظرم","montazeram","Ich warte"],
+     ["دیر می‌کنم","dir mikonam","Ich komme zu spät"]],
+  p:["ساعت هشت میام دنبالت","sā'at hasht miyām donbālet","Um acht hole ich dich ab"]},
+ {t:"Am Telefon",
+  tip:"Iranische Telefonate beginnen fast nie mit dem Anliegen – erst salām, chetori, khubi, und dann der Grund.",
+  w:[["الو","alo","Hallo (am Telefon)"],
+     ["صدات نمیاد","sedāt nemiyād","Ich höre dich nicht"],
+     ["یه لحظه","ye lahze","Einen Moment"],
+     ["بعداً زنگ می‌زنم","ba'dan zang mizanam","Ich rufe später an"],
+     ["قطع شد","ghat' shod","Die Verbindung ist weg"]],
+  p:["الو، صدام میاد؟","alo, sedām miyād?","Hallo, hörst du mich?"]},
+ {t:"Woche 11 festigen", r:true}
+]},
+
+/* ======================= WOCHE 12 ======================= */
+{t:"Höflichkeit und Abschluss", d:[
+ {t:"Schreiben und melden",
+  tip:"دارم + Verb heißt „gerade dabei sein“: dāram miyām = ich bin gerade am Kommen.",
+  w:[["زنگ بزن","zang bezan","Ruf an"],
+     ["پیام بده","payām bede","Schreib mir"],
+     ["جواب بده","javāb bede","Antworte"],
+     ["آنلاینم","onlāynam","Ich bin online"],
+     ["دارم میام","dāram miyām","Ich bin unterwegs"]],
+  p:["بهم زنگ بزن","behem zang bezan","Ruf mich an"]},
+ {t:"Ta'ārof – die persische Höflichkeit",
+  tip:"Ta'ārof ist ein Höflichkeitsspiel: Angebote werden erst abgelehnt und dann angenommen. „ghābel nadāre“ heißt nicht, dass es wirklich umsonst ist.",
+  w:[["دستت درد نکنه","dastet dard nakone","Danke für die Mühe"],
+     ["قابل نداره","ghābel nadāre","Das ist nichts wert","Höfliche Floskel beim Bezahlen."],
+     ["شرمنده","sharmande","Das ist mir peinlich"],
+     ["قدمت روی چشم","ghadamet ru-ye cheshm","Herzlich willkommen"],
+     ["زحمت کشیدی","zahmat keshidi","Du hast dir Mühe gemacht"]],
+  p:["مرسی، دستت درد نکنه","merci, dastet dard nakone","Danke, das war lieb von dir"]},
+ {t:"Feiern und gratulieren",
+  tip:"Nowruz ist der Frühlingsanfang am 20. oder 21. März und das wichtigste Fest im Iran – die Feiern dauern 13 Tage.",
+  w:[["تبریک می‌گم","tabrik migam","Herzlichen Glückwunsch"],
+     ["تولدت مبارک","tavallodet mobārak","Alles Gute zum Geburtstag"],
+     ["سال نو مبارک","sāl-e no mobārak","Frohes neues Jahr"],
+     ["نوروز","nowruz","Nowruz (Neujahr)"],
+     ["عید شما مبارک","eyd-e shomā mobārak","Frohes Fest"]],
+  p:["تولدت مبارک عزیزم","tavallodet mobārak azizam","Alles Gute zum Geburtstag, mein Schatz"]},
+ {t:"Kleine Aufforderungen",
+  tip:"Diese Befehlsformen enden auf -kon oder -bezan. Mit freundlichem Ton oder mit lotfan klingen sie ganz normal.",
+  w:[["گوش کن","gush kon","Hör zu"],
+     ["صبر کن","sabr kon","Warte"],
+     ["نگاه کن","negāh kon","Schau"],
+     ["تعریف کن","ta'rif kon","Erzähl"],
+     ["حرف بزن","harf bezan","Sprich"]],
+  p:["صبر کن، دارم میام","sabr kon, dāram miyām","Warte, ich bin unterwegs"]},
+ {t:"Meinung sagen",
+  tip:"فکر کنم ist der weichste Weg, eine Meinung zu äußern – wie „ich glaub schon“.",
+  w:[["بی‌خیال","bikhiyāl","Lass gut sein"],
+     ["مشکلی نیست","moshkeli nist","Kein Problem"],
+     ["راست می‌گی","rāst migi","Du hast recht"],
+     ["موافقم","movāfegham","Ich stimme zu"],
+     ["فکر کنم","fekr konam","Ich glaube"]],
+  p:["فکر کنم راست می‌گی","fekr konam rāst migi","Ich glaube, du hast recht"]},
+ {t:"Immer, manchmal, nie",
+  tip:"Diese Wörter stehen meist direkt vor dem Verb: hamishe miram, hich vaght nemiram.",
+  w:[["همیشه","hamishe","immer"],
+     ["معمولاً","ma'mulan","meistens"],
+     ["گاهی","gāhi","manchmal"],
+     ["هیچ وقت","hich vaght","nie"],
+     ["مطمئنم","motma'enam","Ich bin sicher"]],
+  p:["همیشه بهت فکر می‌کنم","hamishe behet fekr mikonam","Ich denke immer an dich"]},
+ {t:"Alles zusammen – der Abschlusstag", r:true}
+]}
+
+];
+
+/* Lehrplan flach ausrollen -> DAYS[0..83] */
+const DAYS = [];
+WEEKS.forEach(function(w, wi){
+  w.d.forEach(function(d, di){
+    DAYS.push({
+      n: DAYS.length + 1, week: wi + 1, wtitle: w.t, dayInWeek: di + 1,
+      title: d.t, tip: d.tip || "", words: d.w || [], phrase: d.p || null,
+      review: !!d.r
+    });
+  });
+});
+/* Stabile ID je Vokabel = Lautschrift */
+const ITEM = {};            // id -> {fa,tr,de,note,day}
+DAYS.forEach(function(d){
+  d.ids = [];
+  (d.words||[]).forEach(function(w){
+    var id = w[1];
+    if(!ITEM[id]) ITEM[id] = {fa:w[0], tr:w[1], de:w[2], note:w[3]||"", day:d.n};
+    d.ids.push(id);
+  });
+  if(d.phrase){
+    var pid = d.phrase[1];
+    if(!ITEM[pid]) ITEM[pid] = {fa:d.phrase[0], tr:d.phrase[1], de:d.phrase[2], note:"", day:d.n, isPhrase:true};
+    d.phraseId = pid;
+  }
+});
+
+/* =========================================================================
+   2. SPEICHER  ·  Fortschritt bleibt auf dem Gerät (localStorage)
+   ========================================================================= */
+const KEY = "farsi5.v1";
+const DEF = {
+  v:1, xp:0, streak:0, best:0, lastDone:null, dayIdx:0,
+  done:{}, srs:{}, minutes:0, sessions:0,
+  cfg:{voice:"", rate:.8, mic:true, script:false, hideInstall:false}
+};
+let S = load();
+let memoryOnly = false;
+
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return JSON.parse(JSON.stringify(DEF));
+    var s = JSON.parse(raw);
+    return Object.assign(JSON.parse(JSON.stringify(DEF)), s, {cfg:Object.assign({}, DEF.cfg, s.cfg||{})});
+  }catch(e){ memoryOnly = true; return JSON.parse(JSON.stringify(DEF)); }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ memoryOnly = true; }
+}
+function today(){
+  var d = new Date(), p = function(n){return (n<10?"0":"")+n;};
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+}
+function shiftDay(iso, n){
+  var p = iso.split("-"), d = new Date(+p[0], +p[1]-1, +p[2]);
+  d.setDate(d.getDate()+n);
+  var z = function(x){return (x<10?"0":"")+x;};
+  return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate());
+}
+
+/* =========================================================================
+   3. SPACED REPETITION  ·  Leitner-Boxen mit wachsenden Abständen
+   ========================================================================= */
+const BOX = [0, 1, 2, 4, 8, 16, 32, 64];   // Tage bis zur nächsten Wiederholung
+
+function srsOf(id){ return S.srs[id] || null; }
+function srsSeen(id){
+  if(!S.srs[id]) S.srs[id] = {b:1, due:shiftDay(today(),1), n:0, ok:0};
+}
+function srsGrade(id, correct){
+  srsSeen(id);
+  var r = S.srs[id];
+  r.n++;
+  if(correct){ r.ok++; r.b = Math.min(r.b+1, BOX.length-1); }
+  else { r.b = Math.max(1, r.b-2); }
+  r.due = shiftDay(today(), BOX[r.b]);
+}
+function dueIds(limit){
+  var t = today(), out = [];
+  for(var id in S.srs){ if(S.srs[id].due <= t && ITEM[id]) out.push(id); }
+  out.sort(function(a,b){ return (S.srs[a].b - S.srs[b].b) || (S.srs[a].due < S.srs[b].due ? -1 : 1); });
+  return out.slice(0, limit);
+}
+function knownIds(){ return Object.keys(S.srs).filter(function(id){return ITEM[id];}); }
+function strength(id){
+  var r = srsOf(id); if(!r) return 0;
+  return Math.min(5, Math.round(r.b * 5 / (BOX.length-1)));
+}
+
+/* =========================================================================
+   4. AUSSPRACHE  ·  Text-to-Speech (fa-IR)
+   ========================================================================= */
+let VOICES = [], faVoices = [];
+function loadVoices(){
+  if(!("speechSynthesis" in window)) return;
+  VOICES = speechSynthesis.getVoices() || [];
+  faVoices = VOICES.filter(function(v){ return /^fa/i.test(v.lang) || /persian|farsi|dari/i.test(v.name); });
+}
+if("speechSynthesis" in window){
+  loadVoices();
+  speechSynthesis.onvoiceschanged = function(){ loadVoices(); };
+}
+function pickVoice(){
+  if(!faVoices.length) return null;
+  var want = S.cfg.voice;
+  for(var i=0;i<faVoices.length;i++){ if(faVoices[i].name === want) return faVoices[i]; }
+  return faVoices[0];
+}
+function speak(fa, rate){
+  if(!("speechSynthesis" in window) || !fa) return;
+  try{
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(fa);
+    var v = pickVoice();
+    if(v){ u.voice = v; u.lang = v.lang; } else { u.lang = "fa-IR"; }
+    u.rate = rate || S.cfg.rate || .8;
+    u.pitch = 1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function hasTTS(){ return ("speechSynthesis" in window) && faVoices.length > 0; }
+
+/* =========================================================================
+   5. SPRACHERKENNUNG  ·  Nachsprechen prüfen
+   ========================================================================= */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function hasASR(){ return !!SR && S.cfg.mic; }
+
+function normFa(s){
+  return (s||"")
+    .replace(/[ً-ْٰ‌‏‎]/g,"")   // Diakritika, ZWNJ
+    .replace(/[يى]/g,"ی")                       // ي/ى -> ی
+    .replace(/ك/g,"ک")                               // ك -> ک
+    .replace(/[أإآ]/g,"ا")                 // Hamza-Alef -> ا
+    .replace(/[!-\/:-@\[-`{-~،؛؟٪-٭¿]/g,"")
+    .replace(/\s+/g," ").trim();
+}
+function sim(a,b){
+  a = normFa(a); b = normFa(b);
+  if(!a || !b) return 0;
+  if(a === b) return 1;
+  var m = a.length, n = b.length, prev = [], cur = [], i, j;
+  for(j=0;j<=n;j++) prev[j]=j;
+  for(i=1;i<=m;i++){
+    cur[0]=i;
+    for(j=1;j<=n;j++){
+      cur[j] = Math.min(prev[j]+1, cur[j-1]+1, prev[j-1] + (a[i-1]===b[j-1]?0:1));
+    }
+    prev = cur.slice();
+  }
+  return 1 - prev[n] / Math.max(m,n);
+}
+
+/* =========================================================================
+   6. HILFSFUNKTIONEN
+   ========================================================================= */
+function el(html){ var d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstChild; }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function shuffle(a){ a = a.slice(); for(var i=a.length-1;i>0;i--){ var j = Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } return a; }
+function pick(a,n){ return shuffle(a).slice(0,n); }
+function haptic(ms){ if(navigator.vibrate) try{ navigator.vibrate(ms); }catch(e){} }
+
+function currentDay(){ return DAYS[Math.min(S.dayIdx, DAYS.length-1)]; }
+function doneToday(){ return !!S.done[today()]; }
+function totalWords(){ return knownIds().length; }
+function daysDone(){ return Object.keys(S.done).length; }
+
+/* Streak nachziehen: mehr als ein Tag Pause -> Serie beginnt neu */
+(function fixStreak(){
+  if(!S.lastDone) return;
+  var t = today();
+  if(S.lastDone !== t && S.lastDone !== shiftDay(t,-1)) S.streak = 0;
+})();
+
+/* =========================================================================
+   7. LEKTION AUFBAUEN
+   ========================================================================= */
+let SES = null;
+
+function buildSession(day){
+  var q = [], i;
+  var pool = knownIds();
+  var newIds = day.ids.slice();
+
+  if(!day.review){
+    // 1) Neue Vokabeln vorstellen
+    newIds.forEach(function(id){ q.push({t:"intro", id:id}); });
+    // 2) Jede neue Vokabel einmal abfragen
+    shuffle(newIds).forEach(function(id, k){
+      q.push({t: k % 2 === 0 ? "mc_de" : "listen", id:id});
+    });
+    // 3) Wiederholungen aus dem Speicher
+    var due = dueIds(6).filter(function(id){ return newIds.indexOf(id) < 0; });
+    due.forEach(function(id, k){
+      q.push({t: ["mc_fa","listen","mc_de"][k % 3], id:id});
+    });
+    // 4) Satz des Tages
+    if(day.phraseId){
+      q.push({t:"intro", id:day.phraseId, phrase:true});
+      q.push({t:"build", id:day.phraseId});
+      q.push({t:"speak", id:day.phraseId});
+    }
+    // 5) Eine Sprechaufgabe aus den neuen Vokabeln
+    q.push({t:"speak", id: newIds[Math.floor(Math.random()*newIds.length)]});
+  } else {
+    // Wiederholungstag: zuerst die wackeligsten fälligen Karten, dann die Woche auffüllen
+    var week = DAYS.filter(function(d){ return d.week === day.week; });
+    var ids = [];
+    week.forEach(function(d){ ids = ids.concat(d.ids); if(d.phraseId) ids.push(d.phraseId); });
+    ids = ids.filter(function(id,k){ return ids.indexOf(id) === k && ITEM[id]; });
+    var mix = dueIds(9).concat(shuffle(ids));
+    mix = mix.filter(function(id,k){ return mix.indexOf(id) === k; }).slice(0, 14);
+    mix.forEach(function(id, k){
+      var it = ITEM[id];
+      var types = it && it.isPhrase ? ["build","speak","listen"] : ["mc_de","listen","mc_fa","speak"];
+      q.push({t: types[k % types.length], id:id});
+    });
+  }
+
+  return {day:day, q:q.filter(function(x){ return ITEM[x.id]; }), i:0, right:0, wrong:0, t0:Date.now(), newIds:newIds, pool:pool};
+}
+
+/* =========================================================================
+   8. LEKTIONS-ANSICHT
+   ========================================================================= */
+const $study = document.getElementById("study");
+const $stage = document.getElementById("stage");
+const $foot  = document.getElementById("foot");
+const $qtype = document.getElementById("qtype");
+const $pbar  = document.getElementById("pbar");
+const $pcnt  = document.getElementById("pcount");
+document.getElementById("quit").onclick = function(){
+  if(SES && SES.i > 0 && SES.i < SES.q.length){
+    if(!confirm("Lektion abbrechen? Dein Fortschritt in dieser Lektion geht verloren.")) return;
+  }
+  try{ speechSynthesis.cancel(); }catch(e){}
+  stopRec(); SES = null; $study.style.display = "none"; render();
+};
+
+function startLesson(day){
+  SES = buildSession(day);
+  $study.style.display = "block";
+  window.scrollTo(0,0);
+  step();
+}
+
+function step(){
+  stopRec();
+  try{ speechSynthesis.cancel(); }catch(e){}
+  if(!SES) return;
+  if(SES.i >= SES.q.length) return finish();
+  var pct = Math.round(SES.i / SES.q.length * 100);
+  $pbar.style.width = pct + "%";
+  $pcnt.textContent = SES.i + "/" + SES.q.length;
+  var t = SES.q[SES.i];
+  ({intro:vIntro, mc_de:vMcDe, mc_fa:vMcFa, listen:vListen, build:vBuild, speak:vSpeak})[t.t](t);
+}
+function next(){ SES.i++; step(); }
+
+function speakerHTML(id){
+  return '<div class="spk">'
+    + '<button data-sp="'+esc(id)+'" aria-label="Vorlesen">&#9658;</button>'
+    + '<button class="slow" data-sp="'+esc(id)+'" data-slow="1" aria-label="Langsam vorlesen">.5x</button>'
+    + '</div>';
+}
+function wireSpeakers(root){
+  root.querySelectorAll("[data-sp]").forEach(function(b){
+    b.onclick = function(){
+      var it = ITEM[b.getAttribute("data-sp")];
+      if(!it) return;
+      haptic(8);
+      speak(it.fa, b.getAttribute("data-slow") ? Math.max(.4, (S.cfg.rate||.8) - .35) : null);
+    };
+  });
+}
+function scriptHTML(it){
+  return S.cfg.script && it.fa ? '<div class="script">'+esc(it.fa)+'</div>' : "";
+}
+
+/* --- 8a. Neue Vokabel vorstellen --- */
+function vIntro(t){
+  var it = ITEM[t.id];
+  $qtype.textContent = t.phrase ? "Satz des Tages" : "Neu";
+  $stage.innerHTML = "";
+  var c = el('<div>'
+    + '<div class="fa'+(it.tr.length>18?' sm':'')+'">'+esc(it.tr)+'</div>'
+    + scriptHTML(it)
+    + '<div class="de">'+esc(it.de)+'</div>'
+    + speakerHTML(t.id)
+    + (it.note ? '<div class="note">'+esc(it.note)+'</div>' : "")
+    + (hasTTS() ? '' : '<div class="muted center" style="margin-top:14px">Kein persisches Sprachpaket gefunden &ndash; sprich es laut mit, so wie es dasteht.</div>')
+    + '</div>');
+  $stage.appendChild(c);
+  wireSpeakers(c);
+  setTimeout(function(){ speak(it.fa); }, 260);
+  $foot.innerHTML = "";
+  var b = el('<button class="btn pri">Weiter</button>');
+  b.onclick = function(){ srsSeen(t.id); next(); };
+  $foot.appendChild(b);
+}
+
+/* --- 8b. Multiple Choice: Deutsch -> Lautschrift --- */
+function distract(id, n, byField){
+  var it = ITEM[id];
+  var sameDay = (DAYS[it.day-1] ? DAYS[it.day-1].ids : []).filter(function(x){ return x !== id; });
+  var known  = knownIds().filter(function(x){ return x !== id && !ITEM[x].isPhrase === !it.isPhrase; });
+  var all    = Object.keys(ITEM).filter(function(x){ return x !== id; });
+  var cand = shuffle(sameDay).concat(shuffle(known)).concat(shuffle(all));
+  var out = [], seen = {};
+  for(var i=0; i<cand.length && out.length<n; i++){
+    var c = cand[i], v = ITEM[c][byField];
+    if(seen[v] || v === it[byField]) continue;
+    seen[v] = 1; out.push(c);
+  }
+  return out;
+}
+function mcRender(t, promptHTML, field, typeLabel, autoplay){
+  var it = ITEM[t.id];
+  var opts = shuffle([t.id].concat(distract(t.id, 3, field)));
+  $qtype.textContent = typeLabel;
+  $stage.innerHTML = "";
+  var c = el('<div>' + promptHTML + '<div class="opts"></div></div>');
+  var box = c.querySelector(".opts");
+  opts.forEach(function(id){
+    var o = el('<button class="opt">'+esc(ITEM[id][field])+'</button>');
+    o.onclick = function(){ answer(t, id === t.id, box, opts, field, it, o); };
+    box.appendChild(o);
+  });
+  $stage.appendChild(c);
+  wireSpeakers(c);
+  $foot.innerHTML = "";
+  if(autoplay) setTimeout(function(){ speak(it.fa); }, 200);
+}
+function answer(t, correct, box, opts, field, it, clicked){
+  if(box.dataset.locked) return;
+  box.dataset.locked = "1";
+  haptic(correct ? 10 : [30,60,30]);
+  if(!correct && clicked) clicked.classList.add("no");
+  Array.prototype.forEach.call(box.children, function(b, k){
+    if(opts[k] === t.id){
+      b.classList.remove("no");
+      b.classList.add("ok");
+      b.innerHTML = esc(ITEM[opts[k]][field]) + '<span class="hint">'+esc(field==="de"?it.tr:it.de)+'</span>';
+    }
+  });
+  srsGrade(t.id, correct);
+  if(correct){ SES.right++; S.xp += 4; } else { SES.wrong++; S.xp += 1; }
+  speak(it.fa);
+  $foot.innerHTML = "";
+  var b = el('<button class="btn '+(correct?"pri":"gold")+'">'+(correct?"Weiter":"Verstanden, weiter")+'</button>');
+  b.onclick = next; $foot.appendChild(b);
+}
+function vMcDe(t){
+  var it = ITEM[t.id];
+  mcRender(t, '<div class="de big">'+esc(it.de)+'</div><div class="muted center" style="margin-top:8px">Wie sagt man das?</div>', "tr", "Übersetzen", false);
+}
+function vMcFa(t){
+  var it = ITEM[t.id];
+  mcRender(t, '<div class="fa'+(it.tr.length>18?' sm':'')+'">'+esc(it.tr)+'</div>'+speakerHTML(t.id), "de", "Was bedeutet das?", false);
+}
+function vListen(t){
+  var it = ITEM[t.id];
+  var p = hasTTS()
+    ? '<div class="big-emoji">&#9835;</div>'+speakerHTML(t.id)+'<div class="muted center" style="margin-top:10px">Hör zu und wähle die Bedeutung</div>'
+    : '<div class="fa'+(it.tr.length>18?' sm':'')+'">'+esc(it.tr)+'</div><div class="muted center" style="margin-top:10px">Sprich es laut aus &ndash; was bedeutet es?</div>';
+  mcRender(t, p, "de", "Hören", hasTTS());
+}
+
+/* --- 8c. Satzpuzzle --- */
+function vBuild(t){
+  var it = ITEM[t.id];
+  var words = it.tr.split(/\s+/);
+  if(words.length < 2){ return vMcDe(t); }
+  $qtype.textContent = "Satz bauen";
+  $stage.innerHTML = "";
+  var c = el('<div>'
+    + '<div class="de big">'+esc(it.de)+'</div>'
+    + '<div class="slot" id="slot"></div>'
+    + '<div class="chips" id="chips"></div></div>');
+  $stage.appendChild(c);
+  var slot = c.querySelector("#slot"), chips = c.querySelector("#chips"), built = [];
+  shuffle(words).forEach(function(w, k){
+    var ch = el('<button class="chip">'+esc(w)+'</button>');
+    ch.onclick = function(){
+      if(slot.dataset.locked) return;
+      ch.classList.add("used"); built.push({w:w, ch:ch});
+      var s = el('<button class="chip">'+esc(w)+'</button>');
+      s.onclick = function(){
+        if(slot.dataset.locked) return;
+        ch.classList.remove("used"); s.remove();
+        built = built.filter(function(x){ return x.ch !== ch; });
+        check();
+      };
+      slot.appendChild(s); check();
+    };
+    chips.appendChild(ch);
+  });
+  function check(){
+    if(built.length !== words.length) return;
+    var ok = built.map(function(x){return x.w;}).join(" ") === it.tr;
+    slot.dataset.locked = "1";
+    slot.classList.add(ok ? "ok" : "no");
+    haptic(ok ? 10 : [30,60,30]);
+    srsGrade(t.id, ok);
+    if(ok){ SES.right++; S.xp += 6; } else { SES.wrong++; S.xp += 1; }
+    speak(it.fa);
+    $foot.innerHTML = "";
+    if(!ok) $foot.appendChild(el('<div class="fb no">Richtig w&auml;re: '+esc(it.tr)+'</div>'));
+    var b = el('<button class="btn '+(ok?"pri":"gold")+'" style="margin-top:12px">Weiter</button>');
+    b.onclick = next; $foot.appendChild(b);
+  }
+  $foot.innerHTML = "";
+  var sk = el('<button class="btn ghost">Zeig mir die L&ouml;sung</button>');
+  sk.onclick = function(){
+    slot.dataset.locked = "1";
+    srsGrade(t.id, false); SES.wrong++;
+    speak(it.fa);
+    $foot.innerHTML = "";
+    $foot.appendChild(el('<div class="fb no">'+esc(it.tr)+'</div>'));
+    var b = el('<button class="btn gold" style="margin-top:12px">Weiter</button>'); b.onclick = next; $foot.appendChild(b);
+  };
+  $foot.appendChild(sk);
+}
+
+/* --- 8d. Sprechen --- */
+let REC = null;
+function stopRec(){ if(REC){ try{ REC.stop(); }catch(e){} REC = null; } }
+
+function vSpeak(t){
+  var it = ITEM[t.id];
+  $qtype.textContent = "Sprechen";
+  $stage.innerHTML = "";
+  var c = el('<div>'
+    + '<div class="de big">'+esc(it.de)+'</div>'
+    + '<div class="fa sm" style="margin-top:12px;color:var(--acc)">'+esc(it.tr)+'</div>'
+    + scriptHTML(it)
+    + speakerHTML(t.id)
+    + '<button class="mic" id="mic">&#127908;</button>'
+    + '<div class="heard" id="heard">'+(hasASR() ? "Tippe auf das Mikrofon und sprich nach" : "Sprich es laut aus")+'</div>'
+    + '</div>');
+  $stage.appendChild(c);
+  wireSpeakers(c);
+  setTimeout(function(){ speak(it.fa); }, 250);
+
+  var mic = c.querySelector("#mic"), heard = c.querySelector("#heard");
+  var settled = false;
+
+  function done(ok, msg){
+    if(settled) return; settled = true;
+    mic.classList.remove("rec");
+    srsGrade(t.id, ok);
+    if(ok){ SES.right++; S.xp += 8; } else { SES.wrong++; S.xp += 2; }
+    haptic(ok ? 10 : 25);
+    $foot.innerHTML = "";
+    $foot.appendChild(el('<div class="fb '+(ok?"ok":"no")+'">'+msg+'</div>'));
+    var b = el('<button class="btn pri" style="margin-top:12px">Weiter</button>');
+    b.onclick = next; $foot.appendChild(b);
+  }
+
+  if(hasASR()){
+    mic.onclick = function(){
+      if(settled) return;
+      if(REC){ stopRec(); mic.classList.remove("rec"); return; }
+      try{
+        REC = new SR();
+        REC.lang = "fa-IR"; REC.interimResults = false; REC.maxAlternatives = 3;
+        mic.classList.add("rec"); heard.textContent = "Ich höre zu …";
+        REC.onresult = function(e){
+          var best = 0, said = "";
+          for(var i=0;i<e.results[0].length;i++){
+            var alt = e.results[0][i].transcript, s = sim(alt, it.fa);
+            if(s > best){ best = s; said = alt; }
+          }
+          heard.textContent = "Gehört: " + said;
+          if(best >= .55) done(true, "Sehr gut! Klingt richtig. &#10003;");
+          else done(false, "Fast &ndash; nochmal langsam anh&ouml;ren und wiederholen.");
+        };
+        REC.onerror = function(ev){
+          mic.classList.remove("rec");
+          heard.textContent = ev.error === "not-allowed"
+            ? "Mikrofon nicht erlaubt – sprich einfach laut mit."
+            : "Erkennung nicht möglich – sprich einfach laut mit.";
+          selfRate();
+        };
+        REC.onend = function(){ mic.classList.remove("rec"); REC = null; };
+        REC.start();
+      }catch(e){ heard.textContent = "Mikrofon nicht verf&uuml;gbar."; selfRate(); }
+    };
+  } else {
+    mic.onclick = function(){ speak(it.fa); };
+  }
+
+  function selfRate(){
+    if(settled) return;
+    $foot.innerHTML = "";
+    var r = el('<div class="row">'
+      + '<button class="btn" style="flex:1">Nochmal &uuml;ben</button>'
+      + '<button class="btn pri" style="flex:1">Sa&szlig; ok</button></div>');
+    r.children[0].onclick = function(){ done(false, "Gut &ndash; kommt bald nochmal dran."); };
+    r.children[1].onclick = function(){ done(true, "Weiter so! &#10003;"); };
+    $foot.appendChild(r);
+  }
+  $foot.innerHTML = "";
+  selfRate();
+}
+
+/* =========================================================================
+   9. LEKTION ABSCHLIESSEN
+   ========================================================================= */
+function finish(){
+  var t = today(), day = SES.day;
+  var mins = Math.max(1, Math.round((Date.now() - SES.t0) / 60000));
+  var first = !S.done[t];
+
+  if(first){
+    if(S.lastDone === shiftDay(t,-1)) S.streak++;
+    else if(S.lastDone !== t) S.streak = 1;
+    S.lastDone = t;
+    if(S.streak > S.best) S.best = S.streak;
+  }
+  S.done[t] = {n:(S.done[t] ? S.done[t].n : 0) + 1, day:day.n, r:SES.right, w:SES.wrong, m:(S.done[t]?S.done[t].m:0)+mins};
+  S.minutes += mins; S.sessions++;
+  S.xp += 15;
+  if(day.n - 1 === S.dayIdx) S.dayIdx = Math.min(S.dayIdx + 1, DAYS.length);
+  save();
+
+  var acc = SES.right + SES.wrong ? Math.round(SES.right / (SES.right + SES.wrong) * 100) : 100;
+  $qtype.textContent = "";
+  $pbar.style.width = "100%"; $pcnt.textContent = "";
+  $stage.innerHTML = "";
+  $stage.appendChild(el('<div class="center">'
+    + '<div class="big-emoji">'+(acc>=80?"&#127881;":"&#128077;")+'</div>'
+    + '<h3 style="font-size:26px;margin:16px 0 6px">Tag '+day.n+' geschafft!</h3>'
+    + '<div class="muted" style="margin-bottom:22px">'+esc(day.title)+'</div>'
+    + '<div class="stats">'
+      + '<div class="stat"><b style="color:var(--acc)">'+acc+'%</b><span>RICHTIG</span></div>'
+      + '<div class="stat"><b style="color:var(--gold)">'+S.streak+'</b><span>TAGE SERIE</span></div>'
+      + '<div class="stat"><b>'+totalWords()+'</b><span>W&Ouml;RTER</span></div>'
+    + '</div>'
+    + (S.streak>1 ? '<div class="note" style="text-align:left">'+esc(streakMsg())+'</div>' : '')
+    + '</div>'));
+  $foot.innerHTML = "";
+  var b = el('<button class="btn pri">Fertig f&uuml;r heute</button>');
+  b.onclick = function(){ SES = null; $study.style.display = "none"; go("home"); };
+  $foot.appendChild(b);
+  if(S.dayIdx < DAYS.length){
+    var b2 = el('<button class="btn ghost" style="margin-top:10px">Noch eine Lektion</button>');
+    b2.onclick = function(){ startLesson(DAYS[S.dayIdx]); };
+    $foot.appendChild(b2);
+  }
+}
+function streakMsg(){
+  if(S.streak >= 30) return "30+ Tage am Stück. Das ist der Punkt, an dem Vokabeln von selbst kommen.";
+  if(S.streak >= 14) return "Zwei Wochen ohne Lücke – genau so wird aus Üben Gewohnheit.";
+  if(S.streak >= 7)  return "Eine ganze Woche! Kurz und täglich schlägt lang und selten.";
+  return "Serie läuft. Morgen wieder 5 Minuten – mehr braucht es nicht.";
+}
+
+/* =========================================================================
+   10. ANSICHTEN
+   ========================================================================= */
+let VIEW = "home";
+const $app = document.getElementById("app");
+
+function head(title, sub){
+  return '<div class="hd"><div><h1>'+title+'</h1>'+(sub?'<div class="sub">'+sub+'</div>':'')+'</div>'
+   + '<div style="display:flex;gap:6px">'
+   + '<span class="pill fire">&#9679; '+S.streak+'</span>'
+   + '<span class="pill xp">'+S.xp+' XP</span></div></div>';
+}
+
+/* --- Startseite --- */
+function vHome(){
+  var d = currentDay();
+  var fin = S.dayIdx >= DAYS.length;
+  var did = doneToday();
+  var pct = Math.round(S.dayIdx / DAYS.length * 100);
+  var dueN = dueIds(30).length, due = dueN >= 30 ? "30+" : String(dueN);
+
+  var h = head("Farsi in 5 Minuten", "Tag "+Math.min(S.dayIdx+1, DAYS.length)+" von "+DAYS.length);
+
+  if(fin){
+    h += '<div class="card today"><div class="wk">Fertig</div><h3>Alle 84 Tage geschafft</h3>'
+      + '<p>Du hast '+totalWords()+' W&ouml;rter und S&auml;tze gelernt. Halte sie mit t&auml;glichen 5 Minuten frisch.</p>'
+      + '<button class="btn pri" id="go">Wiederholung starten</button></div>';
+  } else {
+    h += '<div class="card today">'
+      + '<div class="wk">Woche '+d.week+' &middot; '+esc(d.wtitle)+'</div>'
+      + '<h3>'+esc(d.title)+'</h3>'
+      + '<p>'+(d.review ? "Wiederholungstag &ndash; keine neuen W&ouml;rter, nur festigen."
+             : d.words.length+" neue W&ouml;rter"+(dueN? " &middot; "+due+" zum Auffrischen":"")+" &middot; ca. 5 Min.")+'</p>'
+      + '<button class="btn pri" id="go">'+(did ? "Nochmal &uuml;ben" : "Lektion starten")+'</button>'
+      + (did ? '<div class="muted center" style="margin-top:12px">Heute schon erledigt &#10003; Serie gesichert.</div>' : '')
+      + '</div>';
+  }
+
+  h += installHTML();
+
+  h += '<div class="stats">'
+    + '<div class="stat"><b style="color:var(--gold)">'+S.streak+'</b><span>TAGE SERIE</span></div>'
+    + '<div class="stat"><b style="color:var(--acc)">'+totalWords()+'</b><span>W&Ouml;RTER</span></div>'
+    + '<div class="stat"><b>'+daysDone()+'</b><span>LERNTAGE</span></div>'
+    + '</div>';
+
+  h += '<div class="card" style="margin-top:14px"><div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:9px">'
+    + '<span style="font-weight:700">Kursfortschritt</span><span class="muted">'+pct+'%</span></div>'
+    + '<div class="bar"><i style="width:'+pct+'%"></i></div>'
+    + '<div class="muted" style="margin-top:10px">Noch '+(DAYS.length - S.dayIdx)+' Lektionen bis zum Ende von Woche 12.</div></div>';
+
+  if(dueN > 0 && (did || fin)){
+    h += '<button class="btn" id="rev">Noch eine Runde wiederholen</button>';
+  }
+
+  if(!hasTTS()){
+    h += '<div class="warn" style="margin-top:14px"><b>Kein Farsi-Sprachpaket gefunden.</b><br>'
+      + 'Die App zeigt dann nur die Lautschrift. Auf Android: Einstellungen &rarr; Sprache &rarr; Text-in-Sprache &rarr; Persisch laden. '
+      + 'Auf dem iPhone: Einstellungen &rarr; Bedienungshilfen &rarr; Gesprochene Inhalte &rarr; Stimmen &rarr; Persisch.</div>';
+  }
+  if(memoryOnly){
+    h += '<div class="warn" style="margin-top:14px">Dein Browser speichert hier nichts dauerhaft &ndash; der Fortschritt geht beim Schlie&szlig;en verloren. '
+      + '&Ouml;ffne die Datei direkt (nicht im privaten Modus).</div>';
+  }
+
+  $app.innerHTML = h;
+  var g = document.getElementById("go");
+  if(g) g.onclick = function(){ startLesson(fin ? reviewDay() : d); };
+  var r = document.getElementById("rev");
+  if(r) r.onclick = function(){ startLesson(reviewDay()); };
+  wireInstall();
+}
+function reviewDay(){
+  var w = DAYS[Math.max(0, Math.min(S.dayIdx, DAYS.length-1))].week;
+  return {n:S.dayIdx, week:w, wtitle:"Wiederholung", title:"Freie Wiederholung", tip:"", words:[], ids:[], review:true, custom:true};
+}
+
+/* --- Fortschritt --- */
+function vProg(){
+  var h = head("Fortschritt", daysDone()+" Lerntage &middot; "+S.minutes+" Minuten");
+
+  h += '<div class="stats">'
+    + '<div class="stat"><b style="color:var(--gold)">'+S.streak+'</b><span>AKTUELL</span></div>'
+    + '<div class="stat"><b>'+S.best+'</b><span>BESTE SERIE</span></div>'
+    + '<div class="stat"><b style="color:var(--acc)">'+S.xp+'</b><span>XP</span></div>'
+    + '</div>';
+
+  /* 12-Wochen-Raster */
+  h += '<h2 class="sec">Dein Plan &middot; 12 Wochen</h2><div class="card"><div class="heat">';
+  for(var i=0;i<DAYS.length;i++){
+    var cls = [];
+    if(i < S.dayIdx) cls.push("done");
+    if(DAYS[i].review) cls.push("rev");
+    if(i === S.dayIdx) cls.push("today");
+    h += '<i class="'+cls.join(" ")+'" title="Tag '+(i+1)+': '+esc(DAYS[i].title)+'"></i>';
+  }
+  h += '</div><div class="muted" style="margin-top:12px">'
+    + '<span style="color:var(--acc)">&#9632;</span> erledigt &nbsp; '
+    + '<span style="color:var(--gold)">&#9632;</span> Wiederholungstag &nbsp; '
+    + '<span style="color:var(--dim2)">&#9633;</span> offen</div></div>';
+
+  /* Wochenliste */
+  h += '<h2 class="sec">Wochen&uuml;bersicht</h2><div class="card">';
+  WEEKS.forEach(function(w, i){
+    var start = i*7, end = start+7;
+    var cls = S.dayIdx >= end ? "done" : (S.dayIdx >= start ? "cur" : "");
+    var d = Math.max(0, Math.min(7, S.dayIdx - start));
+    h += '<div class="wkrow '+cls+'"><div class="n">'+(i+1)+'</div>'
+      + '<div class="t">'+esc(w.t)+'<div class="c">'+d+'/7 Lektionen</div></div>'
+      + '<div class="c">'+(cls==="done"?"&#10003;":"")+'</div></div>';
+  });
+  h += '</div>';
+
+  /* Wortstärke */
+  var buckets = [0,0,0,0,0,0];
+  knownIds().forEach(function(id){ buckets[strength(id)]++; });
+  h += '<h2 class="sec">Wie fest sitzen die W&ouml;rter?</h2><div class="card">';
+  ["Ganz neu","Wackelig","Kommt","Sitzt","Sitzt gut","Im Schlaf"].forEach(function(lbl,i){
+    var n = buckets[i], p = totalWords() ? Math.round(n/totalWords()*100) : 0;
+    h += '<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px">'
+      + '<span>'+lbl+'</span><span class="muted">'+n+'</span></div>'
+      + '<div class="bar"><i style="width:'+p+'%;background:'+(i>=4?"var(--acc)":i>=2?"var(--gold)":"var(--red)")+'"></i></div></div>';
+  });
+  h += '</div>';
+
+  /* Letzte 14 Tage */
+  h += '<h2 class="sec">Letzte 14 Tage</h2><div class="card"><div style="display:flex;gap:5px;align-items:flex-end;height:76px">';
+  for(var k=13;k>=0;k--){
+    var iso = shiftDay(today(), -k), rec = S.done[iso];
+    var v = rec ? Math.min(1, rec.m/8) : 0;
+    h += '<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%">'
+      + '<div style="height:'+Math.max(6, v*100)+'%;background:'+(rec?"var(--acc)":"var(--bg2)")+';border-radius:5px"></div></div>';
+  }
+  h += '</div><div class="muted" style="margin-top:9px">Balkenh&ouml;he = Lernzeit an dem Tag</div></div>';
+
+  $app.innerHTML = h;
+}
+
+/* --- Wortschatz --- */
+let VQ = "";
+function vVocab(){
+  var ids = knownIds();
+  var h = head("Wortschatz", ids.length+" gelernte W&ouml;rter und S&auml;tze");
+  h += '<input class="search" id="q" placeholder="Suchen (deutsch oder Farsi) …" value="'+esc(VQ)+'">';
+
+  var q = VQ.toLowerCase().trim();
+  var list = ids.filter(function(id){
+    if(!q) return true;
+    var it = ITEM[id];
+    return (it.tr+" "+it.de+" "+it.fa).toLowerCase().indexOf(q) >= 0;
+  }).sort(function(a,b){ return ITEM[b].day - ITEM[a].day || (ITEM[a].tr < ITEM[b].tr ? -1 : 1); });
+
+  if(!ids.length){
+    h += '<div class="card center"><div class="big-emoji">&#128218;</div><div class="muted" style="margin-top:14px">'
+      + 'Hier sammeln sich alle W&ouml;rter, die du gelernt hast. Starte deine erste Lektion.</div></div>';
+  } else if(!list.length){
+    h += '<div class="card center muted">Nichts gefunden.</div>';
+  } else {
+    var lastDay = null;
+    h += '<div class="card">';
+    list.slice(0, 400).forEach(function(id){
+      var it = ITEM[id], s = strength(id);
+      if(it.day !== lastDay){ lastDay = it.day;
+        h += '<div style="font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim2);font-weight:700;margin:14px 0 4px">Tag '+it.day+'</div>'; }
+      h += '<div class="vrow"><button class="sp" data-sp="'+esc(id)+'">&#9658;</button>'
+        + '<div class="txt"><div class="t1">'+esc(it.tr)+'</div><div class="t2">'+esc(it.de)+'</div>'
+        + (S.cfg.script?'<div class="t3">'+esc(it.fa)+'</div>':'')+'</div>'
+        + '<div class="dots">'+[0,1,2,3,4].map(function(k){return '<i class="'+(k<s?"on":"")+'"></i>';}).join("")+'</div></div>';
+    });
+    h += '</div>';
+  }
+  $app.innerHTML = h;
+  wireSpeakers($app);
+  var q2 = document.getElementById("q");
+  if(q2){
+    q2.oninput = function(){ VQ = q2.value; var p = q2.selectionStart; vVocab(); var n = document.getElementById("q"); n.focus(); n.setSelectionRange(p,p); };
+  }
+}
+
+/* --- Einstellungen --- */
+function vSet(){
+  var h = head("Mehr", "Einstellungen &amp; Sicherung");
+
+  h += '<h2 class="sec">Aussprache</h2><div class="card">';
+  if(hasTTS()){
+    h += '<div class="set"><div><div class="lbl">Stimme</div><div class="d">'+faVoices.length+' persische Stimme(n) gefunden</div></div>'
+      + '<select id="voice">'+faVoices.map(function(v){
+          return '<option value="'+esc(v.name)+'"'+(S.cfg.voice===v.name?" selected":"")+'>'+esc(v.name)+'</option>'; }).join("")+'</select></div>';
+    h += '<div class="set"><div><div class="lbl">Sprechtempo</div><div class="d">Aktuell '+Math.round(S.cfg.rate*100)+'%</div></div>'
+      + '<select id="rate">'+[[.6,"Sehr langsam"],[.7,"Langsam"],[.8,"Normal"],[.9,"Z&uuml;gig"],[1,"Schnell"]].map(function(r){
+          return '<option value="'+r[0]+'"'+(Math.abs(S.cfg.rate-r[0])<.01?" selected":"")+'>'+r[1]+'</option>'; }).join("")+'</select></div>';
+    h += '<div class="set"><div><div class="lbl">Test</div><div class="d">salām, chetori?</div></div>'
+      + '<button class="btn sm" id="test">&#9658; H&ouml;ren</button></div>';
+  } else {
+    h += '<div class="warn" style="margin:0">Keine persische Stimme auf diesem Ger&auml;t.<br><br>'
+      + '<b>Android:</b> Einstellungen &rarr; System &rarr; Sprachen &rarr; Text-in-Sprache &rarr; Google TTS &rarr; Sprachdaten &rarr; Persisch installieren.<br>'
+      + '<b>iPhone:</b> Einstellungen &rarr; Bedienungshilfen &rarr; Gesprochene Inhalte &rarr; Stimmen &rarr; Persisch laden.<br>'
+      + '<b>PC:</b> Chrome oder Edge verwenden und ein persisches Sprachpaket installieren.</div>';
+  }
+  h += '</div>';
+
+  h += '<h2 class="sec">&Uuml;ben</h2><div class="card">'
+    + '<div class="set"><div><div class="lbl">Mikrofon-Check</div><div class="d">'
+      + (SR ? "Die App h&ouml;rt beim Nachsprechen zu und pr&uuml;ft" : "Dieser Browser unterst&uuml;tzt keine Spracherkennung. Nimm Chrome (Android/PC) oder Safari.")
+      + '</div></div><div class="sw'+(S.cfg.mic&&SR?" on":"")+'" id="mic"></div></div>'
+    + '<div class="set"><div><div class="lbl">Persische Schrift zeigen</div><div class="d">Zus&auml;tzlich zur Lautschrift &ndash; nur zum Anschauen</div></div>'
+      + '<div class="sw'+(S.cfg.script?" on":"")+'" id="scr"></div></div>'
+    + '</div>';
+
+  h += '<h2 class="sec">Fortschritt sichern</h2><div class="card">'
+    + '<div class="muted" style="margin-bottom:14px">Alles liegt nur in diesem Browser. Wenn du das Ger&auml;t wechselst oder den Browserspeicher leerst, ist der Fortschritt weg &ndash; sichere ihn ab und zu.</div>'
+    + '<button class="btn sm" id="exp" style="width:100%;margin-bottom:10px">Sicherung herunterladen</button>'
+    + '<button class="btn sm ghost" id="imp" style="width:100%">Sicherung einspielen</button>'
+    + '<input type="file" id="file" accept=".json" class="hide"></div>';
+
+  h += '<h2 class="sec">Kurs</h2><div class="card">'
+    + '<div class="set"><div><div class="lbl">Lektion &uuml;berspringen</div><div class="d">Springt zum n&auml;chsten Tag, ohne zu &uuml;ben</div></div>'
+      + '<button class="btn sm" id="skip">Weiter</button></div>'
+    + '<div class="set"><div><div class="lbl">Eine Lektion zur&uuml;ck</div><div class="d">Aktuell Tag '+Math.min(S.dayIdx+1,DAYS.length)+'</div></div>'
+      + '<button class="btn sm" id="back">Zur&uuml;ck</button></div>'
+    + '<div class="set"><div><div class="lbl" style="color:var(--red)">Alles zur&uuml;cksetzen</div><div class="d">L&ouml;scht Serie, XP und alle Vokabeln</div></div>'
+      + '<button class="btn sm" id="reset" style="color:var(--red)">L&ouml;schen</button></div>'
+    + '</div>';
+
+  h += '<div class="muted center" style="margin:22px 0 8px;line-height:1.7">Farsi in 5 Minuten &middot; 84 Lektionen<br>'
+    + 'Umgangssprache aus Teheran, Du-Form.<br>Alle Daten bleiben auf deinem Ger&auml;t.<br>'
+    + (isApp() ? 'Als App installiert &#10003;' : 'L&auml;uft im Browser')+'</div>';
+
+  $app.innerHTML = h;
+
+  var v = document.getElementById("voice");
+  if(v) v.onchange = function(){ S.cfg.voice = v.value; save(); speak("سلام، چطوری؟"); };
+  var r = document.getElementById("rate");
+  if(r) r.onchange = function(){ S.cfg.rate = parseFloat(r.value); save(); speak("سلام، چطوری؟"); };
+  var t = document.getElementById("test");
+  if(t) t.onclick = function(){ speak("سلام، چطوری؟"); };
+
+  document.getElementById("mic").onclick = function(){ if(!SR) return; S.cfg.mic = !S.cfg.mic; save(); vSet(); };
+  document.getElementById("scr").onclick = function(){ S.cfg.script = !S.cfg.script; save(); vSet(); };
+
+  document.getElementById("exp").onclick = function(){
+    var blob = new Blob([JSON.stringify(S,null,1)], {type:"application/json"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "farsi-fortschritt-"+today()+".json";
+    a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  };
+  var f = document.getElementById("file");
+  document.getElementById("imp").onclick = function(){ f.click(); };
+  f.onchange = function(){
+    var file = f.files[0]; if(!file) return;
+    var rd = new FileReader();
+    rd.onload = function(){
+      try{
+        var o = JSON.parse(rd.result);
+        if(typeof o.dayIdx !== "number") throw 0;
+        S = Object.assign(JSON.parse(JSON.stringify(DEF)), o, {cfg:Object.assign({}, DEF.cfg, o.cfg||{})});
+        save(); alert("Fortschritt eingespielt."); go("home");
+      }catch(e){ alert("Das war keine gültige Sicherungsdatei."); }
+    };
+    rd.readAsText(file);
+  };
+
+  document.getElementById("skip").onclick = function(){ S.dayIdx = Math.min(S.dayIdx+1, DAYS.length); save(); vSet(); };
+  document.getElementById("back").onclick = function(){ S.dayIdx = Math.max(0, S.dayIdx-1); save(); vSet(); };
+  document.getElementById("reset").onclick = function(){
+    if(!confirm("Wirklich alles löschen? Serie, XP und Vokabelfortschritt sind dann weg.")) return;
+    S = JSON.parse(JSON.stringify(DEF)); save(); go("home");
+  };
+}
+
+/* --- Router --- */
+function go(v){
+  VIEW = v;
+  document.querySelectorAll("#tabs button").forEach(function(b){ b.classList.toggle("on", b.dataset.v === v); });
+  window.scrollTo(0,0);
+  render();
+}
+function render(){
+  ({home:vHome, prog:vProg, vocab:vVocab, set:vSet})[VIEW]();
+}
+document.querySelectorAll("#tabs button").forEach(function(b){ b.onclick = function(){ go(b.dataset.v); }; });
+
+/* =========================================================================
+   11. ALS APP INSTALLIEREN  ·  Service Worker + Installationshinweis
+   ========================================================================= */
+let installEvent = null;
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("./sw.js").catch(function(){});
+  });
+}
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault(); installEvent = e;
+  if(VIEW === "home") render();
+});
+window.addEventListener("appinstalled", function(){
+  installEvent = null; S.cfg.hideInstall = true; save();
+  if(VIEW === "home") render();
+});
+function isApp(){
+  try{
+    return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
+  }catch(e){ return false; }
+}
+function isIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent)
+      || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+function installHTML(){
+  if(isApp() || S.cfg.hideInstall) return "";
+  if(installEvent){
+    return '<div class="card inst"><h4>Als App installieren</h4>'
+      + '<p>Dann startest du sie vom Startbildschirm aus, ohne Browser und auch ohne Internet.</p>'
+      + '<button class="btn pri" id="doInst">Jetzt installieren</button>'
+      + '<button class="no" id="noInst">Sp&auml;ter</button></div>';
+  }
+  if(isIOS()){
+    return '<div class="card inst"><h4>Auf den Home-Bildschirm legen</h4>'
+      + '<p>Dann startet die App wie eine echte App &ndash; ohne Browserleiste und auch offline.</p>'
+      + '<div class="step"><b>1.</b><span>Unten auf das Teilen-Symbol tippen (Quadrat mit Pfeil nach oben)</span></div>'
+      + '<div class="step"><b>2.</b><span>Nach unten wischen zu &bdquo;Zum Home-Bildschirm&ldquo;</span></div>'
+      + '<div class="step"><b>3.</b><span>Oben rechts auf &bdquo;Hinzuf&uuml;gen&ldquo; tippen</span></div>'
+      + '<button class="no" id="noInst">Verstanden, nicht mehr zeigen</button></div>';
+  }
+  return "";
+}
+function wireInstall(){
+  var a = document.getElementById("doInst");
+  if(a) a.onclick = function(){
+    if(!installEvent) return;
+    installEvent.prompt();
+    installEvent.userChoice.then(function(){ installEvent = null; render(); });
+  };
+  var b = document.getElementById("noInst");
+  if(b) b.onclick = function(){ S.cfg.hideInstall = true; save(); render(); };
+}
+
+/* Sprachausgabe beim allerersten Antippen freischalten (nötig auf iPhone/iPad) */
+(function unlockTTS(){
+  if(!("speechSynthesis" in window)) return;
+  var once = function(){
+    try{ var u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); }catch(e){}
+    loadVoices();
+    document.removeEventListener("touchend", once);
+    document.removeEventListener("click", once);
+  };
+  document.addEventListener("touchend", once, {once:true});
+  document.addEventListener("click", once, {once:true});
+})();
+
+/* Start */
+save();
+render();
+setTimeout(function(){ if(!hasTTS()){ loadVoices(); if(VIEW==="home") render(); } }, 900);
+</script>
+</body>
+</html>
